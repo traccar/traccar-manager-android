@@ -1,5 +1,6 @@
 .gradle
 .idea/
+traccar-manager-android.iml
 local.properties
 app/app.iml
 build/
