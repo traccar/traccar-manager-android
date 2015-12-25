@@ -1,4 +1,3 @@
 <resources>
-    <string name="app_name">TraccarManager</string>
-    <string name="title_activity_main">Main</string>
+    <string name="app_name">Traccar Manager</string>
 </resources>
