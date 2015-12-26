@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Traccar Manager</string>
 
+    <string name="connection_error">Connection error</string>
+
     <string name="devices_title">Devices</string>
     <string name="settings_title">Settings</string>
 
