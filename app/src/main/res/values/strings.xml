@@ -3,4 +3,11 @@
 
     <string name="devices_title">Devices</string>
     <string name="settings_title">Settings</string>
+
+    <string name="settings_url">Server</string>
+    <string name="settings_url_description">Traccar server URL</string>
+    <string name="settings_email">Email</string>
+    <string name="settings_email_description">Registered user email address</string>
+    <string name="settings_password">Password</string>
+    <string name="settings_password_description">User password</string>
 </resources>

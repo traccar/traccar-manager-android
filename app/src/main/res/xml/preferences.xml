@@ -1,8 +1,20 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <CheckBoxPreference
-        android:key="checkbox_preference"
-        android:title="test"
-        android:summary="summary" />
+    <EditTextPreference
+        android:key="url"
+        android:title="@string/settings_url"
+        android:summary="@string/settings_url_description"
+        android:defaultValue="http://demo.traccar.org/" />
+
+    <EditTextPreference
+        android:key="email"
+        android:title="@string/settings_email"
+        android:summary="@string/settings_email_description" />
+
+    <EditTextPreference
+        android:key="password"
+        android:title="@string/settings_password"
+        android:summary="@string/settings_password_description"
+        android:inputType="textPassword" />
 
 </PreferenceScreen>
