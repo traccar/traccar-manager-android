@@ -22,14 +22,22 @@ import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.ws.WebSocket;
+import com.squareup.okhttp.ws.WebSocketCall;
+import com.squareup.okhttp.ws.WebSocketListener;
 
 import org.traccar.manager.model.User;
 
+import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import okio.Buffer;
+import okio.BufferedSource;
 import retrofit.Callback;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
@@ -45,10 +53,15 @@ public class MainApplication extends Application implements SharedPreferences.On
         void onServiceReady(WebService service);
     }
 
+    public interface AsyncServiceListener {
+        void onUpdate(String message);
+    }
+
     private Handler handler = new Handler();
     private SharedPreferences preferences;
     private WebService service;
     private final List<GetServiceCallback> callbacks = new LinkedList<>();
+    private final List<AsyncServiceListener> listeners = new LinkedList<>();
 
     public void getServiceAsync(GetServiceCallback callback) {
         if (service != null) {
@@ -56,6 +69,10 @@ public class MainApplication extends Application implements SharedPreferences.On
         } else {
             callbacks.add(callback);
         }
+    }
+
+    public void registerAsyncServiceListener(AsyncServiceListener listener) {
+        listeners.add(listener);
     }
 
     @Override
@@ -70,9 +87,9 @@ public class MainApplication extends Application implements SharedPreferences.On
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         service = null;
 
-        String url = preferences.getString(PREFERENCE_URL, null);
+        final String url = preferences.getString(PREFERENCE_URL, null);
         String email = preferences.getString(PREFERENCE_EMAIL, null);
-        String password = preferences.getString(PREFERENCE_PASSWORD, null);
+        final String password = preferences.getString(PREFERENCE_PASSWORD, null);
 
         if (url != null && email != null && password != null) {
             OkHttpClient client = new OkHttpClient();
@@ -90,7 +107,7 @@ public class MainApplication extends Application implements SharedPreferences.On
 
             service.addSession(email, password).enqueue(new Callback<User>() {
                 @Override
-                public void onResponse(Response<User> response, Retrofit retrofit) {
+                public void onResponse(final Response<User> response, final Retrofit retrofit) {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -99,6 +116,38 @@ public class MainApplication extends Application implements SharedPreferences.On
                                 callback.onServiceReady(service);
                             }
                             callbacks.clear();
+
+                            Request request = new Request.Builder().url(url + "api/socket").build();
+                            WebSocketCall call = WebSocketCall.create(retrofit.client(), request);
+                            call.enqueue(new WebSocketListener() {
+                                @Override
+                                public void onOpen(WebSocket webSocket, com.squareup.okhttp.Response response) {
+                                }
+
+                                @Override
+                                public void onFailure(IOException e, com.squareup.okhttp.Response response) {
+                                }
+
+                                @Override
+                                public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
+                                    try {
+                                        String message = payload.readString(Charset.defaultCharset());
+                                        for (AsyncServiceListener listener : listeners) {
+                                            listener.onUpdate(message);
+                                        }
+                                    } finally {
+                                        payload.close();
+                                    }
+                                }
+
+                                @Override
+                                public void onPong(Buffer payload) {
+                                }
+
+                                @Override
+                                public void onClose(int code, String reason) {
+                                }
+                            });
                         }
                     });
                 }
