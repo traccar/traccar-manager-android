@@ -15,9 +15,13 @@
  */
 package org.traccar.manager;
 
+import android.app.Activity;
 import android.app.ListFragment;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.traccar.manager.model.Device;
@@ -29,6 +33,8 @@ import retrofit.Response;
 import retrofit.Retrofit;
 
 public class DevicesFragment extends ListFragment {
+
+    public static final String EXTRA_DEVICE_ID = "deviceId";
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -51,6 +57,16 @@ public class DevicesFragment extends ListFragment {
                 });
             }
         });
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            Device device = (Device) getListAdapter().getItem(position);
+            activity.setResult(MainActivity.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, device.getId()));
+            activity.finish();
+        }
     }
 
 }
