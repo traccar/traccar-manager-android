@@ -16,7 +16,41 @@
 package org.traccar.manager;
 
 import android.app.ListFragment;
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
+
+import org.traccar.manager.model.Device;
+
+import java.util.List;
+
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 public class DevicesFragment extends ListFragment {
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        final MainApplication application = (MainApplication) getActivity().getApplication();
+        application.getServiceAsync(new MainApplication.GetServiceCallback() {
+            @Override
+            public void onServiceReady(WebService service) {
+                service.getDevices().enqueue(new Callback<List<Device>>() {
+                    @Override
+                    public void onResponse(Response<List<Device>> response, Retrofit retrofit) {
+                        setListAdapter(new ArrayAdapter<>(application, R.layout.list_item, android.R.id.text1, response.body()));
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        Toast.makeText(application, R.string.error_general, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
 
 }

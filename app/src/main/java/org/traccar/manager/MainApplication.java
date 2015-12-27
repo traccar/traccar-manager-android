@@ -105,7 +105,7 @@ public class MainApplication extends Application implements SharedPreferences.On
 
                 @Override
                 public void onFailure(Throwable t) {
-                    Toast.makeText(MainApplication.this, R.string.connection_error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainApplication.this, R.string.error_connection, Toast.LENGTH_LONG).show();
                 }
             });
         }
