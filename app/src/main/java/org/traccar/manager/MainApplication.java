@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,60 +111,46 @@ public class MainApplication extends Application implements SharedPreferences.On
 
             final WebService service = retrofit.create(WebService.class);
 
-            service.addSession(email, password).enqueue(new Callback<User>() {
+            service.addSession(email, password).enqueue(new WebServiceCallback<User>(this) {
                 @Override
-                public void onResponse(final Response<User> response, final Retrofit retrofit) {
-                    handler.post(new Runnable() {
+                public void onSuccess(Response<User> response, Retrofit retrofit) {
+                    MainApplication.this.service = service;
+                    for (GetServiceCallback callback : callbacks) {
+                        callback.onServiceReady(service);
+                    }
+                    callbacks.clear();
+
+                    Request request = new Request.Builder().url(url + "api/socket").build();
+                    WebSocketCall call = WebSocketCall.create(retrofit.client(), request);
+                    call.enqueue(new WebSocketListener() {
                         @Override
-                        public void run() {
-                            if (response.isSuccess()) {
-                                MainApplication.this.service = service;
-                                for (GetServiceCallback callback : callbacks) {
-                                    callback.onServiceReady(service);
+                        public void onOpen(WebSocket webSocket, com.squareup.okhttp.Response response) {
+                        }
+
+                        @Override
+                        public void onFailure(IOException e, com.squareup.okhttp.Response response) {
+                        }
+
+                        @Override
+                        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
+                            try {
+                                String message = payload.readString(Charset.defaultCharset());
+                                for (AsyncServiceListener listener : listeners) {
+                                    listener.onUpdate(message);
                                 }
-                                callbacks.clear();
-
-                                Request request = new Request.Builder().url(url + "api/socket").build();
-                                WebSocketCall call = WebSocketCall.create(retrofit.client(), request);
-                                call.enqueue(new WebSocketListener() {
-                                    @Override
-                                    public void onOpen(WebSocket webSocket, com.squareup.okhttp.Response response) {
-                                    }
-
-                                    @Override
-                                    public void onFailure(IOException e, com.squareup.okhttp.Response response) {
-                                    }
-
-                                    @Override
-                                    public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                                        try {
-                                            String message = payload.readString(Charset.defaultCharset());
-                                            for (AsyncServiceListener listener : listeners) {
-                                                listener.onUpdate(message);
-                                            }
-                                        } finally {
-                                            payload.close();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onPong(Buffer payload) {
-                                    }
-
-                                    @Override
-                                    public void onClose(int code, String reason) {
-                                    }
-                                });
-                            } else {
-                                Toast.makeText(MainApplication.this, R.string.error_general, Toast.LENGTH_LONG).show();
+                            } finally {
+                                payload.close();
                             }
                         }
-                    });
-                }
 
-                @Override
-                public void onFailure(Throwable t) {
-                    Toast.makeText(MainApplication.this, R.string.error_connection, Toast.LENGTH_LONG).show();
+                        @Override
+                        public void onPong(Buffer payload) {
+                        }
+
+                        @Override
+                        public void onClose(int code, String reason) {
+                        }
+                    });
                 }
             });
         }

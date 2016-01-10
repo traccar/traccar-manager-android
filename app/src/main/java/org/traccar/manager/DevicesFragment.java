@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 package org.traccar.manager;
 
 import android.app.Activity;
-import android.app.ListFragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.traccar.manager.model.Device;
 
 import java.util.List;
 
-import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 
@@ -44,15 +42,10 @@ public class DevicesFragment extends ListFragment {
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
             public void onServiceReady(WebService service) {
-                service.getDevices().enqueue(new Callback<List<Device>>() {
+                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
-                    public void onResponse(Response<List<Device>> response, Retrofit retrofit) {
+                    public void onSuccess(Response<List<Device>> response, Retrofit retrofit) {
                         setListAdapter(new ArrayAdapter<>(application, R.layout.list_item, android.R.id.text1, response.body()));
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        Toast.makeText(application, R.string.error_general, Toast.LENGTH_LONG).show();
                     }
                 });
             }

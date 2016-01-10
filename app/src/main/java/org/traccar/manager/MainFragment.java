@@ -19,12 +19,12 @@ import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MainFragment extends MapFragment implements OnMapReadyCallback {
+public class MainFragment extends SupportMapFragment implements OnMapReadyCallback {
 
     private GoogleMap map;
 

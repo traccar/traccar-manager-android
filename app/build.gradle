@@ -21,6 +21,7 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.android.support:design:23.1.0'
+    compile 'com.android.support:preference-v14:23.1.0'
     compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.squareup.okhttp:okhttp-ws:2.5.0'
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
