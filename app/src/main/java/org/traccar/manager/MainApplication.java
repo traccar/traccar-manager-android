@@ -17,28 +17,17 @@ package org.traccar.manager;
 
 import android.app.Application;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketCall;
-import com.squareup.okhttp.ws.WebSocketListener;
 
 import org.traccar.manager.model.User;
 
-import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import okio.Buffer;
-import okio.BufferedSource;
-import retrofit.Callback;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
@@ -50,29 +39,20 @@ public class MainApplication extends Application implements SharedPreferences.On
     private static final String PREFERENCE_PASSWORD = "password";
 
     public interface GetServiceCallback {
-        void onServiceReady(WebService service);
+        void onServiceReady(WebService service, Retrofit retrofit);
     }
 
-    public interface AsyncServiceListener {
-        void onUpdate(String message);
-    }
-
-    private Handler handler = new Handler();
     private SharedPreferences preferences;
     private WebService service;
+    private Retrofit retrofit;
     private final List<GetServiceCallback> callbacks = new LinkedList<>();
-    private final List<AsyncServiceListener> listeners = new LinkedList<>();
 
     public void getServiceAsync(GetServiceCallback callback) {
         if (service != null) {
-            callback.onServiceReady(service);
+            callback.onServiceReady(service, retrofit);
         } else {
             callbacks.add(callback);
         }
-    }
-
-    public void registerAsyncServiceListener(AsyncServiceListener listener) {
-        listeners.add(listener);
     }
 
     @Override
@@ -103,7 +83,7 @@ public class MainApplication extends Application implements SharedPreferences.On
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
             client.setCookieHandler(cookieManager);
 
-            Retrofit retrofit = new Retrofit.Builder()
+            retrofit = new Retrofit.Builder()
                     .client(client)
                     .baseUrl(url)
                     .addConverterFactory(GsonConverterFactory.create())
@@ -116,41 +96,9 @@ public class MainApplication extends Application implements SharedPreferences.On
                 public void onSuccess(Response<User> response, Retrofit retrofit) {
                     MainApplication.this.service = service;
                     for (GetServiceCallback callback : callbacks) {
-                        callback.onServiceReady(service);
+                        callback.onServiceReady(service, retrofit);
                     }
                     callbacks.clear();
-
-                    Request request = new Request.Builder().url(url + "api/socket").build();
-                    WebSocketCall call = WebSocketCall.create(retrofit.client(), request);
-                    call.enqueue(new WebSocketListener() {
-                        @Override
-                        public void onOpen(WebSocket webSocket, com.squareup.okhttp.Response response) {
-                        }
-
-                        @Override
-                        public void onFailure(IOException e, com.squareup.okhttp.Response response) {
-                        }
-
-                        @Override
-                        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                            try {
-                                String message = payload.readString(Charset.defaultCharset());
-                                for (AsyncServiceListener listener : listeners) {
-                                    listener.onUpdate(message);
-                                }
-                            } finally {
-                                payload.close();
-                            }
-                        }
-
-                        @Override
-                        public void onPong(Buffer payload) {
-                        }
-
-                        @Override
-                        public void onClose(int code, String reason) {
-                        }
-                    });
                 }
             });
         }

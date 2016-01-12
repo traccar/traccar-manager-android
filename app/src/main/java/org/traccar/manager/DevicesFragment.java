@@ -41,7 +41,7 @@ public class DevicesFragment extends ListFragment {
         final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
-            public void onServiceReady(WebService service) {
+            public void onServiceReady(WebService service, Retrofit retrofit) {
                 service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
                     public void onSuccess(Response<List<Device>> response, Retrofit retrofit) {
