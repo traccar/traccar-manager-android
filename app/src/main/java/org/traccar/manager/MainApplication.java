@@ -34,6 +34,7 @@ import retrofit.Retrofit;
 
 public class MainApplication extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    public static final String PREFERENCE_AUTHENTICATED = "authenticated";
     public static final String PREFERENCE_URL = "url";
     public static final String PREFERENCE_EMAIL = "email";
     public static final String PREFERENCE_PASSWORD = "password";

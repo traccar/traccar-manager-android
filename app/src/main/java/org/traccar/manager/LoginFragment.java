@@ -17,6 +17,7 @@ package org.traccar.manager;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -26,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
 
 public class LoginFragment extends Fragment {
 
@@ -55,6 +55,14 @@ public class LoginFragment extends Fragment {
                         })
                         .setNegativeButton(android.R.string.no, null)
                         .show();
+            }
+        });
+
+        view.findViewById(R.id.button_login).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+                startActivity(new Intent(getContext(), MainActivity.class));
             }
         });
 
