@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:padding="?attr/dialogPreferredPadding"
-            android:src="@drawable/ic_menu" />
+            android:src="@drawable/ic_settings" />
 
     </RelativeLayout>
 
