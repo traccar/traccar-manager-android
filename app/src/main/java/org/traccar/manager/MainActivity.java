@@ -26,9 +26,6 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int REQUEST_DEVICE = 1;
-    public static final int RESULT_SUCCESS = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,37 +38,6 @@ public class MainActivity extends AppCompatActivity {
                     .beginTransaction()
                     .add(R.id.content_layout, new MainFragment())
                     .commit();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_devices:
-                startActivityForResult(new Intent(this, DevicesActivity.class), REQUEST_DEVICE);
-                return true;
-            case R.id.action_logout:
-                PreferenceManager.getDefaultSharedPreferences(this)
-                        .edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
-                finish();
-                startActivity(new Intent(this, LoginActivity.class));
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_DEVICE && resultCode == RESULT_SUCCESS) {
-            long deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
-            Toast.makeText(this, "device selected: " + deviceId, Toast.LENGTH_LONG).show();
-            // TODO select device
         }
     }
 

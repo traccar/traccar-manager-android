@@ -15,8 +15,13 @@
  */
 package org.traccar.manager;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,12 +44,46 @@ import retrofit.Retrofit;
 
 public class MainFragment extends SupportMapFragment implements OnMapReadyCallback {
 
+    public static final int REQUEST_DEVICE = 1;
+    public static final int RESULT_SUCCESS = 1;
+
     private GoogleMap map;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         getMapAsync(this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_devices:
+                startActivityForResult(new Intent(getContext(), DevicesActivity.class), REQUEST_DEVICE);
+                return true;
+            case R.id.action_logout:
+                PreferenceManager.getDefaultSharedPreferences(getContext())
+                        .edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
+                getActivity().finish();
+                startActivity(new Intent(getContext(), LoginActivity.class));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_DEVICE && resultCode == RESULT_SUCCESS) {
+            long deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
+            Toast.makeText(getContext(), "device selected: " + deviceId, Toast.LENGTH_LONG).show();
+            // TODO select device
+        }
     }
 
     @Override
@@ -61,7 +100,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         final Snackbar status = Snackbar.make(getView(), "dis", Snackbar.LENGTH_LONG);
         status.show();
 
-        final MainApplication application = (MainApplication) getActivity().getApplication();
+        /*final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
             public void onServiceReady(WebService service, Retrofit retrofit) {
@@ -97,7 +136,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                     }
                 });
             }
-        });
+        });*/
     }
 
 }

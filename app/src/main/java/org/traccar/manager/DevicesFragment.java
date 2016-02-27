@@ -57,7 +57,7 @@ public class DevicesFragment extends ListFragment {
         Activity activity = getActivity();
         if (activity != null) {
             Device device = (Device) getListAdapter().getItem(position);
-            activity.setResult(MainActivity.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, device.getId()));
+            activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, device.getId()));
             activity.finish();
         }
     }
