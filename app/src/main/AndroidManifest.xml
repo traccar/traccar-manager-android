@@ -36,10 +36,6 @@
             android:name=".DevicesActivity"
             android:label="@string/devices_title" />
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/settings_title" />
-
     </application>
 
 </manifest>

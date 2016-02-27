@@ -41,10 +41,6 @@ public class MainActivity extends AppCompatActivity {
                     .beginTransaction()
                     .add(R.id.content_layout, new MainFragment())
                     .commit();
-
-            if (!((MainApplication) getApplication()).isConfigured()) {
-                startActivity(new Intent(this, SettingsActivity.class));
-            }
         }
     }
 

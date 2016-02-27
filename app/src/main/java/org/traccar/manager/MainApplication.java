@@ -39,7 +39,7 @@ public class MainApplication extends Application implements SharedPreferences.On
     public static final String PREFERENCE_EMAIL = "email";
     public static final String PREFERENCE_PASSWORD = "password";
 
-    private static final String DEFAULT_SERVER = "http://demo.traccar.org";
+    private static final String DEFAULT_SERVER = "http://demo.traccar.org"; // local - http://10.0.2.2:8082
 
     public interface GetServiceCallback {
         void onServiceReady(WebService service, Retrofit retrofit);
