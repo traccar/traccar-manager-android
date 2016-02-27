@@ -1,7 +1,5 @@
 package org.traccar.manager;
 
-import com.squareup.okhttp.OkHttpClient;
-
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -15,8 +13,10 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.List;
 
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
@@ -25,10 +25,10 @@ public class WebServiceTest {
     @Test
     public void testWebService() throws Exception {
 
-        OkHttpClient client = new OkHttpClient();
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        client.setCookieHandler(cookieManager);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .cookieJar(new JavaNetCookieJar(cookieManager)).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)

@@ -17,8 +17,10 @@ package org.traccar.manager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,17 +32,20 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketCall;
-import com.squareup.okhttp.ws.WebSocketListener;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.ws.WebSocket;
+import okhttp3.ws.WebSocketCall;
+import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
 import okio.BufferedSource;
-import retrofit.Retrofit;
+import retrofit2.Retrofit;
 
 public class MainFragment extends SupportMapFragment implements OnMapReadyCallback {
 
@@ -48,6 +53,8 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     public static final int RESULT_SUCCESS = 1;
 
     private GoogleMap map;
+
+    private Handler handler = new Handler();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,36 +102,36 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         //map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
-        getActivity().setTitle("disconnected");
+        createWebSocket();
+    }
 
-        final Snackbar status = Snackbar.make(getView(), "dis", Snackbar.LENGTH_LONG);
-        status.show();
-
-        /*final MainApplication application = (MainApplication) getActivity().getApplication();
+    private void createWebSocket() {
+        final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
-            public void onServiceReady(WebService service, Retrofit retrofit) {
-                status.dismiss();
-
-                Request request = new Request.Builder().url(retrofit.baseUrl() + "api/socket").build();
-                WebSocketCall call = WebSocketCall.create(retrofit.client(), request);
+            public void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service) {
+                Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
+                WebSocketCall call = WebSocketCall.create(client, request);
                 call.enqueue(new WebSocketListener() {
                     @Override
-                    public void onOpen(WebSocket webSocket, com.squareup.okhttp.Response response) {
+                    public void onOpen(WebSocket webSocket, Response response) {
+                        Log.i("websocket", "onOpen");
                     }
 
                     @Override
-                    public void onFailure(IOException e, com.squareup.okhttp.Response response) {
+                    public void onFailure(IOException e, Response response) {
+                        Log.i("websocket", "onFailure " + e.getClass().getSimpleName() + " " + e.getMessage());
                     }
 
                     @Override
-                    public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                        try {
+                    public void onMessage(ResponseBody message) throws IOException {
+                        Log.i("websocket", "onMessage");
+                        /*try {
                             String message = payload.readString(Charset.defaultCharset());
                             Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                         } finally {
                             payload.close();
-                        }
+                        }*/
                     }
 
                     @Override
@@ -133,10 +140,17 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
                     @Override
                     public void onClose(int code, String reason) {
+                        Log.i("websocket", "onClose");
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                createWebSocket();
+                            }
+                        });
                     }
                 });
             }
-        });*/
+        });
     }
 
 }

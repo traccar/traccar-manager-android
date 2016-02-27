@@ -27,8 +27,9 @@ import org.traccar.manager.model.Device;
 
 import java.util.List;
 
-import retrofit.Response;
-import retrofit.Retrofit;
+import okhttp3.OkHttpClient;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class DevicesFragment extends ListFragment {
 
@@ -41,10 +42,10 @@ public class DevicesFragment extends ListFragment {
         final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
-            public void onServiceReady(WebService service, Retrofit retrofit) {
+            public void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service) {
                 service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
-                    public void onSuccess(Response<List<Device>> response, Retrofit retrofit) {
+                    public void onSuccess(Response<List<Device>> response) {
                         setListAdapter(new ArrayAdapter<>(application, R.layout.list_item, android.R.id.text1, response.body()));
                     }
                 });

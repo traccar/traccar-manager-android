@@ -19,8 +19,6 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.squareup.okhttp.OkHttpClient;
-
 import org.traccar.manager.model.User;
 
 import java.net.CookieManager;
@@ -28,9 +26,11 @@ import java.net.CookiePolicy;
 import java.util.LinkedList;
 import java.util.List;
 
-import retrofit.GsonConverterFactory;
-import retrofit.Response;
-import retrofit.Retrofit;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainApplication extends Application {
 
@@ -42,11 +42,12 @@ public class MainApplication extends Application {
     private static final String DEFAULT_SERVER = "http://demo.traccar.org"; // local - http://10.0.2.2:8082
 
     public interface GetServiceCallback {
-        void onServiceReady(WebService service, Retrofit retrofit);
+        void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
     }
 
     private SharedPreferences preferences;
 
+    private OkHttpClient client;
     private WebService service;
     private Retrofit retrofit;
 
@@ -54,7 +55,7 @@ public class MainApplication extends Application {
 
     public void getServiceAsync(GetServiceCallback callback) {
         if (service != null) {
-            callback.onServiceReady(service, retrofit);
+            callback.onServiceReady(client, retrofit, service);
         } else {
             if (callbacks.isEmpty()) {
                 initService();
@@ -78,10 +79,10 @@ public class MainApplication extends Application {
         String email = preferences.getString(PREFERENCE_EMAIL, null);
         final String password = preferences.getString(PREFERENCE_PASSWORD, null);
 
-        OkHttpClient client = new OkHttpClient();
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        client.setCookieHandler(cookieManager);
+        client = new OkHttpClient.Builder()
+                .cookieJar(new JavaNetCookieJar(cookieManager)).build();
 
         retrofit = new Retrofit.Builder()
                 .client(client)
@@ -93,10 +94,10 @@ public class MainApplication extends Application {
 
         service.addSession(email, password).enqueue(new WebServiceCallback<User>(this) {
             @Override
-            public void onSuccess(Response<User> response, Retrofit retrofit) {
+            public void onSuccess(Response<User> response) {
                 MainApplication.this.service = service;
                 for (GetServiceCallback callback : callbacks) {
-                    callback.onServiceReady(service, retrofit);
+                    callback.onServiceReady(client, retrofit, service);
                 }
                 callbacks.clear();
             }

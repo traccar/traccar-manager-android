@@ -18,9 +18,10 @@ package org.traccar.manager;
 import android.content.Context;
 import android.widget.Toast;
 
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public abstract class WebServiceCallback<T> implements Callback<T> {
 
@@ -30,19 +31,19 @@ public abstract class WebServiceCallback<T> implements Callback<T> {
         this.context = context;
     }
 
-    public abstract void onSuccess(Response<T> response, Retrofit retrofit);
+    public abstract void onSuccess(Response<T> response);
 
     @Override
-    public final void onResponse(Response<T> response, Retrofit retrofit) {
+    public void onResponse(Call<T> call, Response<T> response) {
         if (response.isSuccess()) {
-            onSuccess(response, retrofit);
+            onSuccess(response);
         } else {
             Toast.makeText(context, R.string.error_general, Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
-    public final void onFailure(Throwable t) {
+    public void onFailure(Call<T> call, Throwable t) {
         Toast.makeText(context, R.string.error_connection, Toast.LENGTH_LONG).show();
     }
 
