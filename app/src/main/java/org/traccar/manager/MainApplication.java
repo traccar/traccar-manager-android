@@ -32,7 +32,7 @@ import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
 
-public class MainApplication extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainApplication extends Application {
 
     public static final String PREFERENCE_AUTHENTICATED = "authenticated";
     public static final String PREFERENCE_URL = "url";
@@ -46,14 +46,19 @@ public class MainApplication extends Application implements SharedPreferences.On
     }
 
     private SharedPreferences preferences;
+
     private WebService service;
     private Retrofit retrofit;
+
     private final List<GetServiceCallback> callbacks = new LinkedList<>();
 
     public void getServiceAsync(GetServiceCallback callback) {
         if (service != null) {
             callback.onServiceReady(service, retrofit);
         } else {
+            if (callbacks.isEmpty()) {
+                initService();
+            }
             callbacks.add(callback);
         }
     }
@@ -66,50 +71,36 @@ public class MainApplication extends Application implements SharedPreferences.On
         if (!preferences.contains(PREFERENCE_URL)) {
             preferences.edit().putString(PREFERENCE_URL, DEFAULT_SERVER).apply();
         }
-
-        preferences.registerOnSharedPreferenceChangeListener(this);
-        onSharedPreferenceChanged(preferences, null);
     }
 
-    public boolean isConfigured() {
-        return preferences.contains(PREFERENCE_URL)
-                && preferences.contains(PREFERENCE_EMAIL)
-                && preferences.contains(PREFERENCE_PASSWORD);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        service = null;
-
+    private void initService() {
         final String url = preferences.getString(PREFERENCE_URL, null);
         String email = preferences.getString(PREFERENCE_EMAIL, null);
         final String password = preferences.getString(PREFERENCE_PASSWORD, null);
 
-        if (url != null && email != null && password != null) {
-            OkHttpClient client = new OkHttpClient();
-            CookieManager cookieManager = new CookieManager();
-            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-            client.setCookieHandler(cookieManager);
+        OkHttpClient client = new OkHttpClient();
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        client.setCookieHandler(cookieManager);
 
-            retrofit = new Retrofit.Builder()
-                    .client(client)
-                    .baseUrl(url)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+        retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-            final WebService service = retrofit.create(WebService.class);
+        final WebService service = retrofit.create(WebService.class);
 
-            service.addSession(email, password).enqueue(new WebServiceCallback<User>(this) {
-                @Override
-                public void onSuccess(Response<User> response, Retrofit retrofit) {
-                    MainApplication.this.service = service;
-                    for (GetServiceCallback callback : callbacks) {
-                        callback.onServiceReady(service, retrofit);
-                    }
-                    callbacks.clear();
+        service.addSession(email, password).enqueue(new WebServiceCallback<User>(this) {
+            @Override
+            public void onSuccess(Response<User> response, Retrofit retrofit) {
+                MainApplication.this.service = service;
+                for (GetServiceCallback callback : callbacks) {
+                    callback.onServiceReady(service, retrofit);
                 }
-            });
-        }
+                callbacks.clear();
+            }
+        });
     }
 
 }
