@@ -17,6 +17,7 @@ package org.traccar.manager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -59,8 +60,11 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_devices:
                 startActivityForResult(new Intent(this, DevicesActivity.class), REQUEST_DEVICE);
                 return true;
-            case R.id.action_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
+            case R.id.action_logout:
+                PreferenceManager.getDefaultSharedPreferences(this)
+                        .edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
+                finish();
+                startActivity(new Intent(this, LoginActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -8,8 +8,8 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/settings_title"
+        android:id="@+id/action_logout"
+        android:title="@string/logout_title"
         app:showAsAction="never" />
 
 </menu>

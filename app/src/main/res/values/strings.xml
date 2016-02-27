@@ -7,6 +7,7 @@
 
     <string name="devices_title">Devices</string>
     <string name="settings_title">Settings</string>
+    <string name="logout_title">Logout</string>
 
     <string name="settings_url">Server</string>
     <string name="settings_url_description">Traccar server URL</string>
