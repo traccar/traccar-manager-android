@@ -18,6 +18,7 @@ package org.traccar.manager;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.multidex.MultiDexApplication;
 
 import org.traccar.manager.model.User;
 
@@ -25,14 +26,15 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
-public class MainApplication extends Application {
+public class MainApplication extends MultiDexApplication {
 
     public static final String PREFERENCE_AUTHENTICATED = "authenticated";
     public static final String PREFERENCE_URL = "url";
@@ -82,12 +84,13 @@ public class MainApplication extends Application {
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         client = new OkHttpClient.Builder()
+                .readTimeout(0, TimeUnit.MILLISECONDS)
                 .cookieJar(new JavaNetCookieJar(cookieManager)).build();
 
         retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(url)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
         final WebService service = retrofit.create(WebService.class);

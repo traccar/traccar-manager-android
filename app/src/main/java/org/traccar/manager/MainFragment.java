@@ -24,17 +24,30 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.traccar.manager.model.Device;
+import org.traccar.manager.model.Position;
+import org.traccar.manager.model.Update;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -55,6 +68,11 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     private GoogleMap map;
 
     private Handler handler = new Handler();
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    private Map<Long, Device> devices = new HashMap<>();
+    private Map<Long, Position> positions = new HashMap<>();
+    private Map<Long, Marker> markers = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,65 +106,96 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_DEVICE && resultCode == RESULT_SUCCESS) {
             long deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
-            Toast.makeText(getContext(), "device selected: " + deviceId, Toast.LENGTH_LONG).show();
-            // TODO select device
+            Position position = positions.get(deviceId);
+            if (position != null) {
+                map.moveCamera(CameraUpdateFactory.newLatLng(
+                        new LatLng(position.getLatitude(), position.getLongitude())));
+            }
         }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-
-        // TODO remove
-        //LatLng sydney = new LatLng(-34, 151);
-        //map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         createWebSocket();
+    }
+
+    private void handleMessage(String message) throws IOException {
+        Update update = objectMapper.readValue(message, Update.class);
+        if (update != null && update.positions != null) {
+            for (Position position : update.positions) {
+                long deviceId = position.getDeviceId();
+                LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
+                Marker marker = markers.get(deviceId);
+                if (marker == null) {
+                    markers.put(deviceId, map.addMarker(new MarkerOptions()
+                            .title(devices.get(deviceId).getName()).position(location)));
+                } else {
+                    marker.setPosition(location);
+                }
+                positions.put(deviceId, position);
+            }
+        }
+    }
+
+    private void reconnectWebSocket() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                createWebSocket();
+            }
+        });
     }
 
     private void createWebSocket() {
         final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
-            public void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service) {
-                Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
-                WebSocketCall call = WebSocketCall.create(client, request);
-                call.enqueue(new WebSocketListener() {
+            public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
+                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
-                    public void onOpen(WebSocket webSocket, Response response) {
-                        Log.i("websocket", "onOpen");
-                    }
+                    public void onSuccess(retrofit2.Response<List<Device>> response) {
+                        for (Device device : response.body()) {
+                            devices.put(device.getId(), device);
+                        }
 
-                    @Override
-                    public void onFailure(IOException e, Response response) {
-                        Log.i("websocket", "onFailure " + e.getClass().getSimpleName() + " " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onMessage(ResponseBody message) throws IOException {
-                        Log.i("websocket", "onMessage");
-                        /*try {
-                            String message = payload.readString(Charset.defaultCharset());
-                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-                        } finally {
-                            payload.close();
-                        }*/
-                    }
-
-                    @Override
-                    public void onPong(Buffer payload) {
-                    }
-
-                    @Override
-                    public void onClose(int code, String reason) {
-                        Log.i("websocket", "onClose");
-                        handler.post(new Runnable() {
+                        Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
+                        WebSocketCall call = WebSocketCall.create(client, request);
+                        call.enqueue(new WebSocketListener() {
                             @Override
-                            public void run() {
-                                createWebSocket();
+                            public void onOpen(WebSocket webSocket, Response response) {
+                            }
+
+                            @Override
+                            public void onFailure(IOException e, Response response) {
+                                reconnectWebSocket();
+                            }
+
+                            @Override
+                            public void onMessage(ResponseBody message) throws IOException {
+                                final String data = message.string();
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            handleMessage(data);
+                                        } catch (IOException e) {
+                                            Log.w(MainFragment.class.getSimpleName(), e);
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onPong(Buffer payload) {
+                            }
+
+                            @Override
+                            public void onClose(int code, String reason) {
+                                reconnectWebSocket();
                             }
                         });
+
                     }
                 });
             }

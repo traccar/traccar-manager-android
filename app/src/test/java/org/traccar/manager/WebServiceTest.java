@@ -16,7 +16,7 @@ import java.util.List;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
@@ -33,7 +33,7 @@ public class WebServiceTest {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl("http://localhost:8082")
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
         WebService service = retrofit.create(WebService.class);
