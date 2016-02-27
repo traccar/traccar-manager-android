@@ -120,11 +120,13 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                 LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
                 Marker marker = markers.get(deviceId);
                 if (marker == null) {
-                    markers.put(deviceId, map.addMarker(new MarkerOptions()
-                            .title(devices.get(deviceId).getName()).position(location)));
+                    marker = map.addMarker(new MarkerOptions()
+                            .title(devices.get(deviceId).getName()).position(location));
+                    markers.put(deviceId, marker);
                 } else {
                     marker.setPosition(location);
                 }
+                // TODO: show details: marker.setSnippet("something: 1\nelse: 2");
                 positions.put(deviceId, position);
             }
         }
@@ -140,58 +142,60 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private void createWebSocket() {
-        final MainApplication application = (MainApplication) getActivity().getApplication();
-        application.getServiceAsync(new MainApplication.GetServiceCallback() {
-            @Override
-            public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
-                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
-                    @Override
-                    public void onSuccess(retrofit2.Response<List<Device>> response) {
-                        for (Device device : response.body()) {
-                            devices.put(device.getId(), device);
-                        }
-
-                        Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
-                        WebSocketCall call = WebSocketCall.create(client, request);
-                        call.enqueue(new WebSocketListener() {
-                            @Override
-                            public void onOpen(WebSocket webSocket, Response response) {
+        if (isResumed()) {
+            final MainApplication application = (MainApplication) getActivity().getApplication();
+            application.getServiceAsync(new MainApplication.GetServiceCallback() {
+                @Override
+                public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
+                    service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
+                        @Override
+                        public void onSuccess(retrofit2.Response<List<Device>> response) {
+                            for (Device device : response.body()) {
+                                devices.put(device.getId(), device);
                             }
 
-                            @Override
-                            public void onFailure(IOException e, Response response) {
-                                reconnectWebSocket();
-                            }
+                            Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
+                            WebSocketCall call = WebSocketCall.create(client, request);
+                            call.enqueue(new WebSocketListener() {
+                                @Override
+                                public void onOpen(WebSocket webSocket, Response response) {
+                                }
 
-                            @Override
-                            public void onMessage(ResponseBody message) throws IOException {
-                                final String data = message.string();
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            handleMessage(data);
-                                        } catch (IOException e) {
-                                            Log.w(MainFragment.class.getSimpleName(), e);
+                                @Override
+                                public void onFailure(IOException e, Response response) {
+                                    reconnectWebSocket();
+                                }
+
+                                @Override
+                                public void onMessage(ResponseBody message) throws IOException {
+                                    final String data = message.string();
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                handleMessage(data);
+                                            } catch (IOException e) {
+                                                Log.w(MainFragment.class.getSimpleName(), e);
+                                            }
                                         }
-                                    }
-                                });
-                            }
+                                    });
+                                }
 
-                            @Override
-                            public void onPong(Buffer payload) {
-                            }
+                                @Override
+                                public void onPong(Buffer payload) {
+                                }
 
-                            @Override
-                            public void onClose(int code, String reason) {
-                                reconnectWebSocket();
-                            }
-                        });
+                                @Override
+                                public void onClose(int code, String reason) {
+                                    reconnectWebSocket();
+                                }
+                            });
 
-                    }
-                });
-            }
-        });
+                        }
+                    });
+                }
+            });
+        }
     }
 
 }
