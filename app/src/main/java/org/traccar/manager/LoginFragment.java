@@ -23,17 +23,55 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class LoginFragment extends Fragment {
+
+    private TextView emailInput;
+    private TextView passwordInput;
+    private View loginButton;
+
+    private TextWatcher textWatcher = new TextWatcher() {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            loginButton.setEnabled(
+                    emailInput.getText().length() > 0 && passwordInput.getText().length() > 0);
+        }
+
+    };
 
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
+
+        emailInput = (TextView) view.findViewById(R.id.input_email);
+        passwordInput = (TextView) view.findViewById(R.id.input_password);
+        loginButton = view.findViewById(R.id.button_login);
+
+        emailInput.addTextChangedListener(textWatcher);
+        passwordInput.addTextChangedListener(textWatcher);
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        if (preferences.getBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false)) {
+            startMainActivity();
+        }
 
         view.findViewById(R.id.button_settings).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,7 +79,6 @@ public class LoginFragment extends Fragment {
                 View dialogView = inflater.inflate(R.layout.view_settings, null);
                 final EditText input = (EditText) dialogView.findViewById(R.id.input_url);
 
-                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
                 input.setText(preferences.getString(MainApplication.PREFERENCE_URL, null));
 
                 new AlertDialog.Builder(getContext())
@@ -58,15 +95,27 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        view.findViewById(R.id.button_login).setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().finish();
-                startActivity(new Intent(getContext(), MainActivity.class));
+
+                preferences
+                        .edit()
+                        .putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, true)
+                        .putString(MainApplication.PREFERENCE_EMAIL, emailInput.getText().toString())
+                        .putString(MainApplication.PREFERENCE_PASSWORD, passwordInput.getText().toString())
+                        .apply();
+
+                startMainActivity();
             }
         });
 
         return view;
+    }
+
+    private void startMainActivity() {
+        getActivity().finish();
+        startActivity(new Intent(getContext(), MainActivity.class));
     }
 
 }

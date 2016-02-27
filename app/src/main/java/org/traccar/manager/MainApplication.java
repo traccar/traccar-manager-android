@@ -39,6 +39,8 @@ public class MainApplication extends Application implements SharedPreferences.On
     public static final String PREFERENCE_EMAIL = "email";
     public static final String PREFERENCE_PASSWORD = "password";
 
+    private static final String DEFAULT_SERVER = "http://demo.traccar.org";
+
     public interface GetServiceCallback {
         void onServiceReady(WebService service, Retrofit retrofit);
     }
@@ -60,6 +62,11 @@ public class MainApplication extends Application implements SharedPreferences.On
     public void onCreate() {
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (!preferences.contains(PREFERENCE_URL)) {
+            preferences.edit().putString(PREFERENCE_URL, DEFAULT_SERVER).apply();
+        }
+
         preferences.registerOnSharedPreferenceChangeListener(this);
         onSharedPreferenceChanged(preferences, null);
     }
