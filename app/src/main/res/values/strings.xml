@@ -12,4 +12,9 @@
     <string name="settings_url">Server</string>
     <string name="settings_email">Email</string>
     <string name="settings_password">Password</string>
+
+    <string name="position_latitude">Latitude</string>
+    <string name="position_longitude">Longitude</string>
+    <string name="position_speed">Speed</string>
+    <string name="position_course">Course</string>
 </resources>

@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -102,6 +104,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
             if (position != null) {
                 map.moveCamera(CameraUpdateFactory.newLatLng(
                         new LatLng(position.getLatitude(), position.getLongitude())));
+                markers.get(deviceId).showInfoWindow();
             }
         }
     }
@@ -109,7 +112,36 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+
+        map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                View view = getLayoutInflater(null).inflate(R.layout.view_info, null);
+                ((TextView) view.findViewById(R.id.title)).setText(marker.getTitle());
+                ((TextView) view.findViewById(R.id.details)).setText(marker.getSnippet());
+                return view;
+            }
+        });
+
         createWebSocket();
+    }
+
+    private String formatDetails(Position position) {
+        return new StringBuilder()
+                .append(getString(R.string.position_latitude)).append(": ")
+                .append(String.format("%.5f", position.getLatitude())).append('\n')
+                .append(getString(R.string.position_longitude)).append(": ")
+                .append(String.format("%.5f", position.getLongitude())).append('\n')
+                .append(getString(R.string.position_speed)).append(": ")
+                .append(String.format("%.1f", position.getSpeed())).append('\n')
+                .append(getString(R.string.position_course)).append(": ")
+                .append(String.format("%.1f", position.getCourse()))
+                .toString();
     }
 
     private void handleMessage(String message) throws IOException {
@@ -126,7 +158,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                 } else {
                     marker.setPosition(location);
                 }
-                // TODO: show details: marker.setSnippet("something: 1\nelse: 2");
+                marker.setSnippet(formatDetails(position));
                 positions.put(deviceId, position);
             }
         }
@@ -190,7 +222,6 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                                     reconnectWebSocket();
                                 }
                             });
-
                         }
                     });
                 }
