@@ -68,6 +68,8 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     private Map<Long, Position> positions = new HashMap<>();
     private Map<Long, Marker> markers = new HashMap<>();
 
+    private WebSocketCall webSocket;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +91,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
             case R.id.action_logout:
                 PreferenceManager.getDefaultSharedPreferences(getContext())
                         .edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
+                ((MainApplication) getActivity().getApplication()).removeService();
                 getActivity().finish();
                 startActivity(new Intent(getContext(), LoginActivity.class));
                 return true;
@@ -164,69 +167,77 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (webSocket != null) {
+            webSocket.cancel();
+        }
+    }
+
     private void reconnectWebSocket() {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                createWebSocket();
+                if (getActivity() != null) {
+                    createWebSocket();
+                }
             }
         });
     }
 
     private void createWebSocket() {
-        if (isResumed()) {
-            final MainApplication application = (MainApplication) getActivity().getApplication();
-            application.getServiceAsync(new MainApplication.GetServiceCallback() {
-                @Override
-                public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
-                    service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
-                        @Override
-                        public void onSuccess(retrofit2.Response<List<Device>> response) {
-                            for (Device device : response.body()) {
-                                devices.put(device.getId(), device);
+        final MainApplication application = (MainApplication) getActivity().getApplication();
+        application.getServiceAsync(new MainApplication.GetServiceCallback() {
+            @Override
+            public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
+                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
+                    @Override
+                    public void onSuccess(retrofit2.Response<List<Device>> response) {
+                        for (Device device : response.body()) {
+                            devices.put(device.getId(), device);
+                        }
+
+                        Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
+                        webSocket = WebSocketCall.create(client, request);
+                        webSocket.enqueue(new WebSocketListener() {
+                            @Override
+                            public void onOpen(WebSocket webSocket, Response response) {
                             }
 
-                            Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
-                            WebSocketCall call = WebSocketCall.create(client, request);
-                            call.enqueue(new WebSocketListener() {
-                                @Override
-                                public void onOpen(WebSocket webSocket, Response response) {
-                                }
+                            @Override
+                            public void onFailure(IOException e, Response response) {
+                                reconnectWebSocket();
+                            }
 
-                                @Override
-                                public void onFailure(IOException e, Response response) {
-                                    reconnectWebSocket();
-                                }
-
-                                @Override
-                                public void onMessage(ResponseBody message) throws IOException {
-                                    final String data = message.string();
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                handleMessage(data);
-                                            } catch (IOException e) {
-                                                Log.w(MainFragment.class.getSimpleName(), e);
-                                            }
+                            @Override
+                            public void onMessage(ResponseBody message) throws IOException {
+                                final String data = message.string();
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            handleMessage(data);
+                                        } catch (IOException e) {
+                                            Log.w(MainFragment.class.getSimpleName(), e);
                                         }
-                                    });
-                                }
+                                    }
+                                });
+                            }
 
-                                @Override
-                                public void onPong(Buffer payload) {
-                                }
+                            @Override
+                            public void onPong(Buffer payload) {
+                            }
 
-                                @Override
-                                public void onClose(int code, String reason) {
-                                    reconnectWebSocket();
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
+                            @Override
+                            public void onClose(int code, String reason) {
+                                reconnectWebSocket();
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
 }

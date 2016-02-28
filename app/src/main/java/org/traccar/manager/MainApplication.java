@@ -66,6 +66,10 @@ public class MainApplication extends MultiDexApplication {
         }
     }
 
+    public void removeService() {
+        service = null;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
