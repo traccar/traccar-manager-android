@@ -9,8 +9,17 @@ android {
         minSdkVersion 14
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
         multiDexEnabled = true
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../../android.keystore')
+            keyAlias 'tananaev'
+            storePassword ''
+            keyPassword ''
+        }
     }
 
     dexOptions {
@@ -21,6 +30,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
         }
     }
 
@@ -41,4 +51,15 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-jackson:2.0.0-beta4'
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'
+}
+
+task requestPasswords << {
+    android.signingConfigs.release.storePassword = new String(System.console().readPassword('\nStore password: '))
+    android.signingConfigs.release.keyPassword = new String(System.console().readPassword('Key password: '))
+}
+
+tasks.whenTaskAdded { theTask ->
+    if (theTask.name.equals('packageRelease')) {
+        theTask.dependsOn 'requestPasswords'
+    }
 }
