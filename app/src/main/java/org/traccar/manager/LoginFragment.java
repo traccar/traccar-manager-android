@@ -25,11 +25,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LoginFragment extends Fragment {
 
@@ -86,8 +88,13 @@ public class LoginFragment extends Fragment {
                         .setView(dialogView)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                preferences.edit().putString(
-                                        MainApplication.PREFERENCE_URL, input.getText().toString()).apply();
+                                String url = input.getText().toString();
+                                if (Patterns.WEB_URL.matcher(url).matches()) {
+                                    preferences.edit().putString(
+                                            MainApplication.PREFERENCE_URL, url).apply();
+                                } else {
+                                    Toast.makeText(getContext(), R.string.error_invalid_url, Toast.LENGTH_LONG).show();
+                                }
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)
