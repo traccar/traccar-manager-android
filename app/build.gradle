@@ -8,8 +8,8 @@ android {
         applicationId "org.traccar.manager"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 4
-        versionName "1.2"
+        versionCode 5
+        versionName "1.3"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
     }
