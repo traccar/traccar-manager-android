@@ -33,6 +33,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import okhttp3.HttpUrl;
+
 public class LoginFragment extends Fragment {
 
     private TextView emailInput;
@@ -89,7 +91,7 @@ public class LoginFragment extends Fragment {
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 String url = input.getText().toString();
-                                if (Patterns.WEB_URL.matcher(url).matches()) {
+                                if (HttpUrl.parse(url) != null) {
                                     preferences.edit().putString(
                                             MainApplication.PREFERENCE_URL, url).apply();
                                 } else {
