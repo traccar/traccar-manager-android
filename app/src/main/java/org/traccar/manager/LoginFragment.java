@@ -29,6 +29,7 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,8 +83,12 @@ public class LoginFragment extends Fragment {
             public void onClick(View v) {
                 View dialogView = inflater.inflate(R.layout.view_settings, null);
                 final EditText input = (EditText) dialogView.findViewById(R.id.input_url);
+                final CheckBox trustAllCertificatesCheckBox = (CheckBox) dialogView.findViewById(R.id.trust_all_certificates);
+                final CheckBox trustAllHostsCheckBox = (CheckBox) dialogView.findViewById(R.id.trust_all_hosts);
 
                 input.setText(preferences.getString(MainApplication.PREFERENCE_URL, null));
+                trustAllCertificatesCheckBox.setChecked(preferences.getBoolean(MainApplication.PREFERENCE_TRUSTALLCERTIFICATES, false));
+                trustAllHostsCheckBox.setChecked(preferences.getBoolean(MainApplication.PREFERENCE_TRUSTALLHOSTS, false));
 
                 new AlertDialog.Builder(getContext())
                         .setTitle(R.string.settings_title)
@@ -92,11 +97,16 @@ public class LoginFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 String url = input.getText().toString();
                                 if (HttpUrl.parse(url) != null) {
-                                    preferences.edit().putString(
-                                            MainApplication.PREFERENCE_URL, url).apply();
+                                    preferences.edit()
+                                            .putString(MainApplication.PREFERENCE_URL, url)
+                                            .apply();
                                 } else {
                                     Toast.makeText(getContext(), R.string.error_invalid_url, Toast.LENGTH_LONG).show();
                                 }
+                                preferences.edit()
+                                        .putBoolean(MainApplication.PREFERENCE_TRUSTALLCERTIFICATES, trustAllCertificatesCheckBox.isChecked())
+                                        .putBoolean(MainApplication.PREFERENCE_TRUSTALLHOSTS, trustAllHostsCheckBox.isChecked())
+                                        .apply();
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)
