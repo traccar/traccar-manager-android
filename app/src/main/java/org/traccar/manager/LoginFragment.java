@@ -73,6 +73,8 @@ public class LoginFragment extends Fragment {
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        emailInput.setText(preferences.getString(MainApplication.PREFERENCE_EMAIL, null));
+
         if (preferences.getBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false)) {
             startMainActivity();
         }
