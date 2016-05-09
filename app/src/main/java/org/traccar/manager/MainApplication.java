@@ -44,7 +44,7 @@ public class MainApplication extends MultiDexApplication {
     private static final String DEFAULT_SERVER = "http://demo.traccar.org"; // local - http://10.0.2.2:8082
 
     public interface GetServiceCallback {
-        void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
+        void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service, User user);
     }
 
     private SharedPreferences preferences;
@@ -52,12 +52,13 @@ public class MainApplication extends MultiDexApplication {
     private OkHttpClient client;
     private WebService service;
     private Retrofit retrofit;
+    private User user;
 
     private final List<GetServiceCallback> callbacks = new LinkedList<>();
 
     public void getServiceAsync(GetServiceCallback callback) {
         if (service != null) {
-            callback.onServiceReady(client, retrofit, service);
+            callback.onServiceReady(client, retrofit, service, user);
         } else {
             if (callbacks.isEmpty()) {
                 initService();
@@ -66,8 +67,11 @@ public class MainApplication extends MultiDexApplication {
         }
     }
 
+    public User getUser() { return user; }
+
     public void removeService() {
         service = null;
+        user = null;
     }
 
     @Override
@@ -103,8 +107,9 @@ public class MainApplication extends MultiDexApplication {
             @Override
             public void onSuccess(Response<User> response) {
                 MainApplication.this.service = service;
+                MainApplication.this.user = response.body();
                 for (GetServiceCallback callback : callbacks) {
-                    callback.onServiceReady(client, retrofit, service);
+                    callback.onServiceReady(client, retrofit, service, user);
                 }
                 callbacks.clear();
             }

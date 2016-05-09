@@ -17,6 +17,8 @@ package org.traccar.manager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Date;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Position {
 
@@ -38,6 +40,24 @@ public class Position {
 
     public void setDeviceId(long deviceId) {
         this.deviceId = deviceId;
+    }
+
+    private Date fixTime;
+
+    public Date getFixTime() {
+        if (fixTime != null) {
+            return new Date(fixTime.getTime());
+        } else {
+            return null;
+        }
+    }
+
+    public void setFixTime(Date fixTime) {
+        if (fixTime != null) {
+            this.fixTime = new Date(fixTime.getTime());
+        } else {
+            this.fixTime = null;
+        }
     }
 
     private double latitude;
