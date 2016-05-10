@@ -221,7 +221,8 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
-            public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service, User user) {
+            public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
+                User user = application.getUser();
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(user.getLatitude(), user.getLongitude()), user.getZoom()));
                 service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
