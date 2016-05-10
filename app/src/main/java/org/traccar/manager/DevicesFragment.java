@@ -86,7 +86,7 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
 
     private void showPopupMenu(View view) {
         final PopupAdapter adapter = (PopupAdapter) getListAdapter();
-        final Device user = (Device) view.getTag();
+        final Device device = (Device) view.getTag();
         PopupMenu popup = new PopupMenu(getActivity(), view);
 
         popup.getMenuInflater().inflate(R.menu.popup, popup.getMenu());
@@ -96,13 +96,10 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_show_on_map:
-                        Activity activity = getActivity();
-                        if (activity != null) {
-                            activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, user.getId()));
-                            activity.finish();
-                        }
+                        finishActivityActivity(device.getId());
                         return true;
                     case R.id.action_send_command:
+                        startSendCommandActivity();
                         return true;
                 }
                 return false;
@@ -110,5 +107,16 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         });
 
         popup.show();
+    }
+
+    private void finishActivityActivity(long deviceId) {
+        Activity activity = getActivity();
+        activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, deviceId));
+        activity.finish();
+    }
+
+    private void startSendCommandActivity() {
+        getActivity().finish();
+        startActivity(new Intent(getContext(), SendCommandActivity.class));
     }
 }
