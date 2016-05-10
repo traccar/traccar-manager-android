@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import org.traccar.manager.model.Device;
+import org.traccar.manager.model.User;
 
 import java.util.List;
 

@@ -52,6 +52,7 @@ public class MainApplication extends MultiDexApplication {
     private OkHttpClient client;
     private WebService service;
     private Retrofit retrofit;
+    private User user;
 
     private final List<GetServiceCallback> callbacks = new LinkedList<>();
 
@@ -66,8 +67,11 @@ public class MainApplication extends MultiDexApplication {
         }
     }
 
+    public User getUser() { return user; }
+
     public void removeService() {
         service = null;
+        user = null;
     }
 
     @Override
@@ -103,6 +107,7 @@ public class MainApplication extends MultiDexApplication {
             @Override
             public void onSuccess(Response<User> response) {
                 MainApplication.this.service = service;
+                MainApplication.this.user = response.body();
                 for (GetServiceCallback callback : callbacks) {
                     callback.onServiceReady(client, retrofit, service);
                 }

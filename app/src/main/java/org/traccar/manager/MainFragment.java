@@ -38,8 +38,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.traccar.manager.model.Device;
 import org.traccar.manager.model.Position;
 import org.traccar.manager.model.Update;
+import org.traccar.manager.model.User;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,13 +137,42 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private String formatDetails(Position position) {
+        final MainApplication application = (MainApplication) getActivity().getApplication();
+        final User user = application.getUser();
+
+        SimpleDateFormat dateFormat = null;
+        if(user.getTwelveHourFormat()) {
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        } else {
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+
+        String speedUnit = "";
+        double factor = 1;
+        if(user.getSpeedUnit().equals("kn")) {
+            speedUnit = getString(R.string.user_kn);
+            factor = 1;
+        } else if(user.getSpeedUnit().equals("kmh")) {
+            speedUnit = getString(R.string.user_kmh);
+            factor = 1.852;
+        } else if(user.getSpeedUnit().equals("mph")) {
+            speedUnit = getString(R.string.user_mph);
+            factor = 1.15078;
+        }
+        double speed = position.getSpeed() * factor;
+
         return new StringBuilder()
+                .append(getString(R.string.position_time)).append(": ")
+                .append(dateFormat.format(position.getFixTime())).append('\n')
                 .append(getString(R.string.position_latitude)).append(": ")
                 .append(String.format("%.5f", position.getLatitude())).append('\n')
                 .append(getString(R.string.position_longitude)).append(": ")
                 .append(String.format("%.5f", position.getLongitude())).append('\n')
+                .append(getString(R.string.position_altitude)).append(": ")
+                .append(String.format("%.1f", position.getAltitude())).append('\n')
                 .append(getString(R.string.position_speed)).append(": ")
-                .append(String.format("%.1f", position.getSpeed())).append('\n')
+                .append(String.format("%.1f", speed)).append(' ')
+                .append(speedUnit).append('\n')
                 .append(getString(R.string.position_course)).append(": ")
                 .append(String.format("%.1f", position.getCourse()))
                 .toString();
@@ -191,6 +222,9 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
             public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
+                User user = application.getUser();
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(user.getLatitude(), user.getLongitude()), user.getZoom()));
                 service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
                     public void onSuccess(retrofit2.Response<List<Device>> response) {
