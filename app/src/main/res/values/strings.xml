@@ -24,4 +24,7 @@
     <string name="position_speed">Speed</string>
     <string name="position_altitude">Altitude</string>
     <string name="position_course">Course</string>
+
+    <string name="action_show_on_map">Show on map</string>
+    <string name="action_send_command">Send command</string>
 </resources>
