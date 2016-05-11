@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,19 @@
  */
 package org.traccar.manager.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+public class Message {
 
-import java.util.Date;
+    private long deviceId;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CommandType {
+    public long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
+    }
 
     private String type;
-
-    public CommandType() {}
-
-    public CommandType(String type) {
-        this.type = type;
-    }
 
     public String getType() {
         return type;
