@@ -21,10 +21,18 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import org.traccar.manager.model.CommandType;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class SendCommandFragment extends Fragment {
+
+    public static final String EXTRA_DEVICE_ID = "deviceId";
 
     private Spinner commandsSpinner;
     private View sendButton;
@@ -36,6 +44,21 @@ public class SendCommandFragment extends Fragment {
 
         commandsSpinner = (Spinner) view.findViewById(R.id.commands);
         sendButton = (Button) view.findViewById(R.id.button_send);
+
+        long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
+        final MainApplication application = (MainApplication) getActivity().getApplication();
+        final WebService service = application.getService();
+        service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getContext()) {
+            @Override
+            public void onSuccess(retrofit2.Response<List<CommandType>> response) {
+                List<String> keys = new ArrayList<>();
+                for (CommandType commandType: response.body()) {
+                    keys.add(commandType.getType());
+                }
+                commandsSpinner.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_item, android.R.id.text1, keys));
+                //commandsSpinner.setAdapter(new ArrayAdapter<CommandType>(getContext(), R.layout.list_item, android.R.id.text1, response.body()));
+            }
+        });
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override

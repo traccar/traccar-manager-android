@@ -24,12 +24,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import org.traccar.manager.model.Device;
-import org.traccar.manager.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -96,10 +93,10 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_show_on_map:
-                        finishActivityActivity(device.getId());
+                        finishDevicesActivity(device.getId());
                         return true;
                     case R.id.action_send_command:
-                        startSendCommandActivity();
+                        startSendCommandActivity(device.getId());
                         return true;
                 }
                 return false;
@@ -109,14 +106,13 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         popup.show();
     }
 
-    private void finishActivityActivity(long deviceId) {
+    private void finishDevicesActivity(long deviceId) {
         Activity activity = getActivity();
         activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, deviceId));
         activity.finish();
     }
 
-    private void startSendCommandActivity() {
-        getActivity().finish();
-        startActivity(new Intent(getContext(), SendCommandActivity.class));
+    private void startSendCommandActivity(long deviceId) {
+        startActivity(new Intent(getContext(), SendCommandActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId));
     }
 }

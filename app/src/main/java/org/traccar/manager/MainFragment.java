@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -137,7 +138,11 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private String formatDetails(Position position) {
-        final MainApplication application = (MainApplication) getActivity().getApplication();
+        FragmentActivity activity = getActivity();
+        if(activity == null) {
+            return "";
+        }
+        final MainApplication application = (MainApplication) activity.getApplication();
         final User user = application.getUser();
 
         SimpleDateFormat dateFormat = null;
