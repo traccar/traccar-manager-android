@@ -18,19 +18,62 @@ package org.traccar.manager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import org.traccar.manager.model.Command;
 import org.traccar.manager.model.CommandType;
+import org.traccar.manager.model.Device;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import retrofit2.Response;
 
 public class SendCommandFragment extends Fragment {
+
+    class CommandTypeAdapter extends ArrayAdapter<CommandType> {
+
+        CommandTypeAdapter(List<CommandType> items) {
+            super(getActivity(), R.layout.list_item, android.R.id.text1, items);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup container) {
+            View view = super.getView(position, convertView, container);
+
+            CommandType commandType = getItem(position);
+            CharSequence name = commandType.getType();
+            Integer resId = i10nMapping.get(commandType.getType());
+            if(resId != null) {
+                name = getContext().getResources().getText(resId);
+            }
+
+            TextView popupText = (TextView) view.findViewById(android.R.id.text1);
+            popupText.setText(name);
+            popupText.setTag(commandType);
+
+            return view;
+        }
+    }
+
+    private static Map<String, Integer> i10nMapping = new HashMap<>();
+
+    static {
+        i10nMapping.put(Command.TYPE_ALARM_ARM, R.string.command_alarm_arm);
+        i10nMapping.put(Command.TYPE_ALARM_DISARM, R.string.command_alarm_disarm);
+        i10nMapping.put(Command.TYPE_ENGINE_STOP, R.string.command_engine_stop);
+        i10nMapping.put(Command.TYPE_ENGINE_RESUME, R.string.command_engine_resume);
+    }
 
     public static final String EXTRA_DEVICE_ID = "deviceId";
 
@@ -45,24 +88,32 @@ public class SendCommandFragment extends Fragment {
         commandsSpinner = (Spinner) view.findViewById(R.id.commands);
         sendButton = (Button) view.findViewById(R.id.button_send);
 
-        long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
+        final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
         final MainApplication application = (MainApplication) getActivity().getApplication();
         final WebService service = application.getService();
         service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getContext()) {
             @Override
-            public void onSuccess(retrofit2.Response<List<CommandType>> response) {
-                List<String> keys = new ArrayList<>();
-                for (CommandType commandType: response.body()) {
-                    keys.add(commandType.getType());
-                }
-                commandsSpinner.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_item, android.R.id.text1, keys));
-                //commandsSpinner.setAdapter(new ArrayAdapter<CommandType>(getContext(), R.layout.list_item, android.R.id.text1, response.body()));
+            public void onSuccess(Response<List<CommandType>> response) {
+                commandsSpinner.setAdapter(new CommandTypeAdapter(response.body()));
             }
         });
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Command command = new Command();
+                command.setDeviceId(deviceId);
+                command.setType((String) commandsSpinner.getSelectedItem());
+
+                final MainApplication application = (MainApplication) getActivity().getApplication();
+                final WebService service = application.getService();
+                service.sendCommand(command).enqueue(new WebServiceCallback<Command>(getContext()) {
+                    @Override
+                    public void onSuccess(Response<Command> response) {
+                        Toast.makeText(getContext(), R.string.command_sent, Toast.LENGTH_LONG).show();
+                    }
+                });
+
                 getActivity().finish();
             }
         });

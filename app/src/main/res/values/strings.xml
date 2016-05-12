@@ -30,4 +30,13 @@
     <string name="action_send_command">Send command</string>
 
     <string name="command_send">Send</string>
+    <string name="command_sent">Command has been sent</string>
+
+    <string name="command_alarm_arm">Arm</string>
+    <string name="command_alarm_disarm">Disarm</string>
+    <string name="command_engine_stop">Engine Stop</string>
+    <string name="command_engine_resume">Engine Resume</string>
+    <string name="command_position_periodic">Periodic Reporting</string>
+    <string name="command_frequency">Frequency</string>
+
 </resources>

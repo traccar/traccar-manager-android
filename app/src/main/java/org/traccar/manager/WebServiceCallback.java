@@ -43,7 +43,8 @@ public abstract class WebServiceCallback<T> implements Callback<T> {
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
-        Toast.makeText(context, R.string.error_connection, Toast.LENGTH_LONG).show();
+        CharSequence text = context.getResources().getText(R.string.error_connection);
+        Toast.makeText(context, text + ": " + t.getMessage(), Toast.LENGTH_LONG).show();
     }
 
 }

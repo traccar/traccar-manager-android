@@ -24,6 +24,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -44,5 +45,5 @@ public interface WebService {
     Call<List<CommandType>> getCommandTypes(@Query("deviceId") long deviceId);
 
     @POST("/api/commands")
-    Call<Response> sendCommand(Command command);
+    Call<Command> sendCommand(@Body Command command);
 }
