@@ -15,6 +15,7 @@
  */
 package org.traccar.manager;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -41,9 +42,24 @@ import retrofit2.Response;
 
 public class SendCommandFragment extends Fragment {
 
-    class CommandTypeAdapter extends ArrayAdapter<CommandType> {
+    class CommandTypeDataHolder {
+        private String type;
+        private String name;
 
-        CommandTypeAdapter(List<CommandType> items) {
+        public CommandTypeDataHolder(String type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    class CommandTypeAdapter extends ArrayAdapter<CommandTypeDataHolder> {
+
+        CommandTypeAdapter(List<CommandTypeDataHolder> items) {
             super(getActivity(), R.layout.list_item, android.R.id.text1, items);
         }
 
@@ -51,16 +67,10 @@ public class SendCommandFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup container) {
             View view = super.getView(position, convertView, container);
 
-            CommandType commandType = getItem(position);
-            CharSequence name = commandType.getType();
-            Integer resId = i10nMapping.get(commandType.getType());
-            if(resId != null) {
-                name = getContext().getResources().getText(resId);
-            }
-
+            CommandTypeDataHolder commandTypeDataHolder = getItem(position);
             TextView popupText = (TextView) view.findViewById(android.R.id.text1);
-            popupText.setText(name);
-            popupText.setTag(commandType);
+            popupText.setText(commandTypeDataHolder.name);
+            view.setTag(commandTypeDataHolder.type);
 
             return view;
         }
@@ -73,6 +83,7 @@ public class SendCommandFragment extends Fragment {
         i10nMapping.put(Command.TYPE_ALARM_DISARM, R.string.command_alarm_disarm);
         i10nMapping.put(Command.TYPE_ENGINE_STOP, R.string.command_engine_stop);
         i10nMapping.put(Command.TYPE_ENGINE_RESUME, R.string.command_engine_resume);
+        i10nMapping.put(Command.TYPE_POSITION_PERIODIC, R.string.command_position_periodic);
     }
 
     public static final String EXTRA_DEVICE_ID = "deviceId";
@@ -94,7 +105,21 @@ public class SendCommandFragment extends Fragment {
         service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getContext()) {
             @Override
             public void onSuccess(Response<List<CommandType>> response) {
-                commandsSpinner.setAdapter(new CommandTypeAdapter(response.body()));
+                List<CommandTypeDataHolder> commandTypeDataHolders = new ArrayList<>();
+
+                for (CommandType commandType: response.body()) {
+                    String name = commandType.getType();
+                    Integer resId = i10nMapping.get(commandType.getType());
+                    if(resId != null) {
+                        try {
+                            CharSequence nameCharSequence = getContext().getResources().getText(resId);
+                            name = nameCharSequence.toString();
+                        } catch (Resources.NotFoundException e) {}
+                    }
+                    commandTypeDataHolders.add(new CommandTypeDataHolder(commandType.getType(), name));
+                }
+
+                commandsSpinner.setAdapter(new CommandTypeAdapter(commandTypeDataHolders));
             }
         });
 
@@ -103,7 +128,7 @@ public class SendCommandFragment extends Fragment {
             public void onClick(View v) {
                 Command command = new Command();
                 command.setDeviceId(deviceId);
-                command.setType((String) commandsSpinner.getSelectedItem());
+                command.setType((String) commandsSpinner.getSelectedView().getTag());
 
                 final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
