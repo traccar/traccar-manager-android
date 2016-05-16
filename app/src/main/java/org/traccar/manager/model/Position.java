@@ -20,27 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Position {
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
+public class Position extends Event {
 
     private Date fixTime;
 
@@ -58,6 +38,31 @@ public class Position {
         } else {
             this.fixTime = null;
         }
+    }
+
+    public void setTime(Date time) {
+        setDeviceTime(time);
+        setFixTime(time);
+    }
+
+    private boolean outdated;
+
+    public boolean getOutdated() {
+        return outdated;
+    }
+
+    public void setOutdated(boolean outdated) {
+        this.outdated = outdated;
+    }
+
+    private boolean valid;
+
+    public boolean getValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     private double latitude;
@@ -108,6 +113,16 @@ public class Position {
 
     public void setCourse(double course) {
         this.course = course;
+    }
+
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
 }
