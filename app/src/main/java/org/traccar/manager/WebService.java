@@ -15,16 +15,22 @@
  */
 package org.traccar.manager;
 
+import org.traccar.manager.model.Command;
+import org.traccar.manager.model.CommandType;
 import org.traccar.manager.model.Device;
 import org.traccar.manager.model.User;
 
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface WebService {
 
@@ -35,4 +41,9 @@ public interface WebService {
     @GET("/api/devices")
     Call<List<Device>> getDevices();
 
+    @GET("/api/commandtypes")
+    Call<List<CommandType>> getCommandTypes(@Query("deviceId") long deviceId);
+
+    @POST("/api/commands")
+    Call<Command> sendCommand(@Body Command command);
 }

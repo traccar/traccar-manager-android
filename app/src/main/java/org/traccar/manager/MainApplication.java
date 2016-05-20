@@ -67,6 +67,7 @@ public class MainApplication extends MultiDexApplication {
         }
     }
 
+    public WebService getService() { return service; }
     public User getUser() { return user; }
 
     public void removeService() {

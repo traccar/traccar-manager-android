@@ -7,6 +7,7 @@
     <string name="error_invalid_url">Invalid server URL</string>
 
     <string name="devices_title">Devices</string>
+    <string name="send_command_title">Send command</string>
     <string name="settings_title">Settings</string>
     <string name="logout_title">Logout</string>
 
@@ -24,4 +25,18 @@
     <string name="position_speed">Speed</string>
     <string name="position_altitude">Altitude</string>
     <string name="position_course">Course</string>
+
+    <string name="action_show_on_map">Show on map</string>
+    <string name="action_send_command">Send command</string>
+
+    <string name="command_send">Send</string>
+    <string name="command_sent">Command has been sent</string>
+
+    <string name="command_alarm_arm">Arm</string>
+    <string name="command_alarm_disarm">Disarm</string>
+    <string name="command_engine_stop">Engine Stop</string>
+    <string name="command_engine_resume">Engine Resume</string>
+    <string name="command_position_periodic">Periodic Reporting</string>
+    <string name="command_frequency">Frequency</string>
+
 </resources>

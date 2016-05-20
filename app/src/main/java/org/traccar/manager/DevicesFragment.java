@@ -19,12 +19,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v7.widget.PopupMenu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import org.traccar.manager.model.Device;
-import org.traccar.manager.model.User;
 
 import java.util.List;
 
@@ -32,9 +33,25 @@ import okhttp3.OkHttpClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class DevicesFragment extends ListFragment {
+public class DevicesFragment extends ListFragment implements View.OnClickListener {
 
     public static final String EXTRA_DEVICE_ID = "deviceId";
+
+    class PopupAdapter extends ArrayAdapter<Device> {
+
+        PopupAdapter(List<Device> items) {
+            super(getActivity(), R.layout.list_item, android.R.id.text1, items);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup container) {
+            View view = super.getView(position, convertView, container);
+            View popupText = view.findViewById(android.R.id.text1);
+            popupText.setTag(getItem(position));
+            popupText.setOnClickListener(DevicesFragment.this);
+            return view;
+        }
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -47,7 +64,7 @@ public class DevicesFragment extends ListFragment {
                 service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
                     public void onSuccess(Response<List<Device>> response) {
-                        setListAdapter(new ArrayAdapter<>(application, R.layout.list_item, android.R.id.text1, response.body()));
+                        setListAdapter(new PopupAdapter(response.body()));
                     }
                 });
             }
@@ -55,13 +72,47 @@ public class DevicesFragment extends ListFragment {
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Activity activity = getActivity();
-        if (activity != null) {
-            Device device = (Device) getListAdapter().getItem(position);
-            activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, device.getId()));
-            activity.finish();
-        }
+    public void onClick(final View view) {
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                showPopupMenu(view);
+            }
+        });
     }
 
+    private void showPopupMenu(View view) {
+        final PopupAdapter adapter = (PopupAdapter) getListAdapter();
+        final Device device = (Device) view.getTag();
+        PopupMenu popup = new PopupMenu(getActivity(), view);
+
+        popup.getMenuInflater().inflate(R.menu.popup, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_show_on_map:
+                        finishDevicesActivity(device.getId());
+                        return true;
+                    case R.id.action_send_command:
+                        startSendCommandActivity(device.getId());
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        popup.show();
+    }
+
+    private void finishDevicesActivity(long deviceId) {
+        Activity activity = getActivity();
+        activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, deviceId));
+        activity.finish();
+    }
+
+    private void startSendCommandActivity(long deviceId) {
+        startActivity(new Intent(getContext(), SendCommandActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId));
+    }
 }
