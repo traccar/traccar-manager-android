@@ -31,6 +31,8 @@ public class PositionPeriodicCommandHandler implements CommandHandler {
     public PositionPeriodicCommandHandler(View view, Resources resources) {
         frequency = (NumberPicker) view.findViewById(R.id.frequency);
         unitSpinner = (Spinner) view.findViewById(R.id.unit);
+
+        onCommandNotingSelected();
     }
 
     @Override
