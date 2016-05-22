@@ -2,6 +2,10 @@
     <string name="app_name">Traccar Manager</string>
     <string name="app_login">Login</string>
 
+    <string name="shared_second">Second</string>
+    <string name="shared_minute">Minute</string>
+    <string name="shared_hour">Hour</string>
+
     <string name="error_connection">Connection error</string>
     <string name="error_general">Server request error</string>
     <string name="error_invalid_url">Invalid server URL</string>
