@@ -16,30 +16,76 @@
             android:layout_centerVertical="true"
             android:padding="?attr/dialogPreferredPadding">
 
-            <android.support.design.widget.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/commandsText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/command_command"
+                    android:layout_gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
 
                 <Spinner
                     android:id="@+id/commands"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
-            </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
 
-            <NumberPicker
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/frequency"
-                android:layout_gravity="center_horizontal"
-                android:visibility="gone" />
-
-            <Spinner
-                android:id="@+id/unit"
+            <LinearLayout
+                android:id="@+id/frequencyGroup"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/unit_entries"
-                android:visibility="gone"/>
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/frequencyText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/command_frequency_frequency"
+                    android:layout_gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                    <NumberPicker
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/frequency" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/unitGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/unitText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/command_frequency_unit"
+                    android:layout_gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                <Spinner
+                    android:id="@+id/unit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:entries="@array/unit_entries" />
+
+            </LinearLayout>
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/button_send"

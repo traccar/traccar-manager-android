@@ -17,6 +17,7 @@ package org.traccar.manager.commandhandler;
 
 import android.content.res.Resources;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 
@@ -25,31 +26,35 @@ import org.traccar.manager.model.Command;
 
 public class PositionPeriodicCommandHandler implements CommandHandler {
     private Resources resources;
+    private LinearLayout frequencyGroup;
     private NumberPicker frequency;
+    private LinearLayout unitGroup;
     private Spinner unitSpinner;
 
     public PositionPeriodicCommandHandler(View view, Resources resources) {
+        frequencyGroup = (LinearLayout) view.findViewById(R.id.frequencyGroup);
         frequency = (NumberPicker) view.findViewById(R.id.frequency);
+        unitGroup = (LinearLayout) view.findViewById(R.id.unitGroup);
         unitSpinner = (Spinner) view.findViewById(R.id.unit);
 
-        onCommandNotingSelected();
+        onCommandNothingSelected();
     }
 
     @Override
     public void onCommandSelected(String commandType) {
         if(commandType.equals(Command.TYPE_POSITION_PERIODIC)) {
-            frequency.setVisibility(View.VISIBLE);
-            unitSpinner.setVisibility(View.VISIBLE);
+            frequencyGroup.setVisibility(View.VISIBLE);
+            unitGroup.setVisibility(View.VISIBLE);
         } else {
-            frequency.setVisibility(View.GONE);
-            unitSpinner.setVisibility(View.GONE);
+            frequencyGroup.setVisibility(View.GONE);
+            unitGroup.setVisibility(View.GONE);
         }
     }
 
     @Override
-    public void onCommandNotingSelected() {
-        frequency.setVisibility(View.GONE);
-        unitSpinner.setVisibility(View.GONE);
+    public void onCommandNothingSelected() {
+        frequencyGroup.setVisibility(View.GONE);
+        unitGroup.setVisibility(View.GONE);
     }
 
     @Override

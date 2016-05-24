@@ -118,7 +118,7 @@ public class SendCommandFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 for (CommandHandler commandHandler: commandHandlers) {
-                    commandHandler.onCommandNotingSelected();
+                    commandHandler.onCommandNothingSelected();
                 }
             }
         });

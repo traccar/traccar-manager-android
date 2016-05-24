@@ -19,6 +19,6 @@ import org.traccar.manager.model.Command;
 
 public interface CommandHandler {
     public void onCommandSelected(String commandType);
-    public void onCommandNotingSelected();
+    public void onCommandNothingSelected();
     public void onCommandAddParameters(Command command);
 }
