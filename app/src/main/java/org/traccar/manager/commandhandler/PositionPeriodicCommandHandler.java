@@ -27,15 +27,18 @@ import org.traccar.manager.model.Command;
 public class PositionPeriodicCommandHandler implements CommandHandler {
     private Resources resources;
     private LinearLayout frequencyGroup;
-    private NumberPicker frequency;
+    private NumberPicker frequencyNumberPicker;
     private LinearLayout unitGroup;
     private Spinner unitSpinner;
 
     public PositionPeriodicCommandHandler(View view, Resources resources) {
         frequencyGroup = (LinearLayout) view.findViewById(R.id.frequencyGroup);
-        frequency = (NumberPicker) view.findViewById(R.id.frequency);
+        frequencyNumberPicker = (NumberPicker) view.findViewById(R.id.frequency);
         unitGroup = (LinearLayout) view.findViewById(R.id.unitGroup);
         unitSpinner = (Spinner) view.findViewById(R.id.unit);
+
+        frequencyNumberPicker.setMinValue(0);
+        frequencyNumberPicker.setMaxValue(512);
 
         onCommandNothingSelected();
     }
@@ -60,7 +63,7 @@ public class PositionPeriodicCommandHandler implements CommandHandler {
     @Override
     public void onCommandAddParameters(Command command) {
         if (command.getType().equals(Command.TYPE_POSITION_PERIODIC)) {
-            int value = frequency.getValue();
+            int value = frequencyNumberPicker.getValue();
             int multiplier = resources.getIntArray(R.array.unit_values)[unitSpinner.getSelectedItemPosition()];
             command.set(Command.KEY_FREQUENCY, value * multiplier);
         }

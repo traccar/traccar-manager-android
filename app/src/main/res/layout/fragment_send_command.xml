@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_centerVertical="true"
-            android:padding="?attr/dialogPreferredPadding">
+            android:padding="?attr/dialogPreferredPadding" >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,9 +56,10 @@
                     android:textAppearance="?android:attr/textAppearanceLarge" />
 
                     <NumberPicker
+                        android:id="@+id/frequency"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/frequency" />
+                        android:layout_weight="1" />
 
             </LinearLayout>
 
