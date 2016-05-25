@@ -33,9 +33,9 @@
     <string name="action_show_on_map">Show on map</string>
     <string name="action_send_command">Send command</string>
 
-    <string name="command_command">Command:</string>
-    <string name="command_frequency_frequency">Frequency:</string>
-    <string name="command_frequency_unit">Unit:</string>
+    <string name="command_command">Command</string>
+    <string name="command_frequency_frequency">Frequency</string>
+    <string name="command_frequency_unit">Unit</string>
     <string name="command_send">Send</string>
     <string name="command_sent">Command has been sent</string>
 

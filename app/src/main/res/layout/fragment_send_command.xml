@@ -55,11 +55,11 @@
                     android:layout_gravity="center"
                     android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                    <NumberPicker
-                        android:id="@+id/frequency"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                <NumberPicker
+                    android:id="@+id/frequency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
             </LinearLayout>
 

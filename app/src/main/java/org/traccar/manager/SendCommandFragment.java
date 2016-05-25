@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,9 +34,7 @@ import org.traccar.manager.commandhandler.CommandHandler;
 import org.traccar.manager.commandhandler.PositionPeriodicCommandHandler;
 import org.traccar.manager.model.Command;
 import org.traccar.manager.model.CommandType;
-import org.traccar.manager.model.Device;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,7 +129,7 @@ public class SendCommandFragment extends Fragment {
                 List<CommandTypeDataHolder> commandTypeDataHolders = new ArrayList<>();
 
                 for (CommandType commandType: response.body()) {
-                    String name = getI10NString(commandType.getType());
+                    String name = getI10nString(commandType.getType());
                     commandTypeDataHolders.add(new CommandTypeDataHolder(commandType.getType(), name));
                 }
 
@@ -167,7 +164,7 @@ public class SendCommandFragment extends Fragment {
         return view;
     }
 
-    private String getI10NString(String key) {
+    private String getI10nString(String key) {
         String result = key;
 
         Integer resId = i10nMapping.get(key);
@@ -175,7 +172,9 @@ public class SendCommandFragment extends Fragment {
             try {
                 CharSequence nameCharSequence = getContext().getResources().getText(resId);
                 result = nameCharSequence.toString();
-            } catch (Resources.NotFoundException e) {}
+            } catch (Resources.NotFoundException e) {
+                Log.w(SendCommandFragment.class.getSimpleName(), e);
+            }
         }
 
         return result;
