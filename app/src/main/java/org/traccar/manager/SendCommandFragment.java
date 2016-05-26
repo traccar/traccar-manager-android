@@ -23,15 +23,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.traccar.manager.model.Command;
 import org.traccar.manager.model.CommandType;
-import org.traccar.manager.model.Device;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,6 +92,10 @@ public class SendCommandFragment extends Fragment {
     public static final String EXTRA_DEVICE_ID = "deviceId";
 
     private Spinner commandsSpinner;
+    private LinearLayout frequencyGroup;
+    private EditText frequencyEditText;
+    private LinearLayout unitGroup;
+    private Spinner unitSpinner;
     private View sendButton;
 
     @Nullable
@@ -97,7 +104,33 @@ public class SendCommandFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_send_command, container, false);
 
         commandsSpinner = (Spinner) view.findViewById(R.id.commands);
+        frequencyGroup = (LinearLayout) view.findViewById(R.id.frequencyGroup);
+        frequencyEditText = (EditText) view.findViewById(R.id.frequency);
+        unitGroup = (LinearLayout) view.findViewById(R.id.unitGroup);
+        unitSpinner = (Spinner) view.findViewById(R.id.unit);
         sendButton = (Button) view.findViewById(R.id.button_send);
+
+        frequencyGroup.setVisibility(View.GONE);
+        unitGroup.setVisibility(View.GONE);
+
+        commandsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(view.getTag().toString().equals(Command.TYPE_POSITION_PERIODIC)) {
+                    frequencyGroup.setVisibility(View.VISIBLE);
+                    unitGroup.setVisibility(View.VISIBLE);
+                } else {
+                    frequencyGroup.setVisibility(View.GONE);
+                    unitGroup.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                frequencyGroup.setVisibility(View.GONE);
+                unitGroup.setVisibility(View.GONE);
+            }
+        });
 
         final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
         final MainApplication application = (MainApplication) getActivity().getApplication();
@@ -108,14 +141,7 @@ public class SendCommandFragment extends Fragment {
                 List<CommandTypeDataHolder> commandTypeDataHolders = new ArrayList<>();
 
                 for (CommandType commandType: response.body()) {
-                    String name = commandType.getType();
-                    Integer resId = i10nMapping.get(commandType.getType());
-                    if(resId != null) {
-                        try {
-                            CharSequence nameCharSequence = getContext().getResources().getText(resId);
-                            name = nameCharSequence.toString();
-                        } catch (Resources.NotFoundException e) {}
-                    }
+                    String name = getI10nString(commandType.getType());
                     commandTypeDataHolders.add(new CommandTypeDataHolder(commandType.getType(), name));
                 }
 
@@ -129,6 +155,18 @@ public class SendCommandFragment extends Fragment {
                 Command command = new Command();
                 command.setDeviceId(deviceId);
                 command.setType((String) commandsSpinner.getSelectedView().getTag());
+
+                if (command.getType().equals(Command.TYPE_POSITION_PERIODIC)) {
+                    int value = 0;
+                    try {
+                        value = Integer.parseInt(frequencyEditText.getText().toString());
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(getContext(), R.string.error_invalid_frequency, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    int multiplier = getResources().getIntArray(R.array.unit_values)[unitSpinner.getSelectedItemPosition()];
+                    command.set(Command.KEY_FREQUENCY, value * multiplier);
+                }
 
                 final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
@@ -146,4 +184,19 @@ public class SendCommandFragment extends Fragment {
         return view;
     }
 
+    private String getI10nString(String key) {
+        String result = key;
+
+        Integer resId = i10nMapping.get(key);
+        if(resId != null) {
+            try {
+                CharSequence nameCharSequence = getContext().getResources().getText(resId);
+                result = nameCharSequence.toString();
+            } catch (Resources.NotFoundException e) {
+                Log.w(SendCommandFragment.class.getSimpleName(), e);
+            }
+        }
+
+        return result;
+    }
 }

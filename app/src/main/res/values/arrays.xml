@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="unit_entries">
+        <item>@string/shared_second</item>
+        <item>@string/shared_minute</item>
+        <item>@string/shared_hour</item>
+    </string-array>
+    <integer-array name="unit_values">
+        <item>1</item>
+        <item>60</item>
+        <item>3600</item>
+    </integer-array>
+</resources>
