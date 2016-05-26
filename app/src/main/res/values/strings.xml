@@ -9,6 +9,7 @@
     <string name="error_connection">Connection error</string>
     <string name="error_general">Server request error</string>
     <string name="error_invalid_url">Invalid server URL</string>
+    <string name="error_invalid_frequency">Frequency must be a valid number</string>
 
     <string name="devices_title">Devices</string>
     <string name="send_command_title">Send command</string>
