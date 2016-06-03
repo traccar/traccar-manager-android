@@ -37,6 +37,10 @@
             android:label="@string/devices_title" />
 
         <activity
+            android:name=".EditDeviceActivity"
+            android:label="@string/edit_device_title" />
+
+        <activity
             android:name=".SendCommandActivity"
             android:label="@string/send_command_title" />
 

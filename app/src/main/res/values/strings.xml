@@ -14,6 +14,7 @@
     <string name="devices_title">Devices</string>
     <string name="edit_device_title">Edit device</string>
     <string name="send_command_title">Send command</string>
+    <string name="edit_device_title">Edit device</string>
     <string name="settings_title">Settings</string>
     <string name="logout_title">Logout</string>
 
