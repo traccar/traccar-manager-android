@@ -64,9 +64,9 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
+        View view = super.onCreateView(inflater, container, savedInstanceState);
 
-        addButton = (FloatingActionButton) view.findViewById(R.id.addButton);
+        addButton = (FloatingActionButton) container.findViewById(R.id.addButton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
