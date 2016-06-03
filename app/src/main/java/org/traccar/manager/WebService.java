@@ -25,10 +25,12 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -40,6 +42,15 @@ public interface WebService {
 
     @GET("/api/devices")
     Call<List<Device>> getDevices();
+
+    @POST("/api/devices")
+    Call<Device> addDevice(@Body Device device);
+
+    @PUT("/api/devices/{id}")
+    Call<Device> updateDevice(@Path("id") long id, @Body Device device);
+
+    @DELETE("/api/devices/{id}")
+    Call<Void> removeDevice(@Path("id") long id);
 
     @GET("/api/commandtypes")
     Call<List<CommandType>> getCommandTypes(@Query("deviceId") long deviceId);

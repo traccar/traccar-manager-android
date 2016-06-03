@@ -12,6 +12,7 @@
     <string name="error_invalid_frequency">Frequency must be a valid number</string>
 
     <string name="devices_title">Devices</string>
+    <string name="edit_device_title">Edit device</string>
     <string name="send_command_title">Send command</string>
     <string name="settings_title">Settings</string>
     <string name="logout_title">Logout</string>
@@ -24,6 +25,14 @@
     <string name="user_kmh">km/h</string>
     <string name="user_mph">mph</string>
 
+    <string name="device_name">Name</string>
+    <string name="device_identifier">Identifier</string>
+    <string name="device_group">Group</string>
+    <string name="device_save">Save</string>
+    <string name="device_created">Device has been created</string>
+    <string name="device_updated">Device has been updated</string>
+    <string name="device_removed">Device has been removed</string>
+
     <string name="position_time">Time</string>
     <string name="position_latitude">Latitude</string>
     <string name="position_longitude">Longitude</string>
@@ -31,6 +40,8 @@
     <string name="position_altitude">Altitude</string>
     <string name="position_course">Course</string>
 
+    <string name="action_edit_device">Edit</string>
+    <string name="action_remove_device">Remove</string>
     <string name="action_show_on_map">Show on map</string>
     <string name="action_send_command">Send command</string>
 

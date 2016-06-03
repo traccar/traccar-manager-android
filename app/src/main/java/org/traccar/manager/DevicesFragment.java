@@ -16,14 +16,17 @@
 package org.traccar.manager;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import org.traccar.manager.model.Device;
 
@@ -92,6 +95,12 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.action_edit_device:
+                        startEditDeviceActivity(device.getId());
+                        return true;
+                    case R.id.action_remove_device:
+                        removeDevice(device.getId());
+                        return true;
                     case R.id.action_show_on_map:
                         finishDevicesActivity(device.getId());
                         return true;
@@ -110,6 +119,35 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         Activity activity = getActivity();
         activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, deviceId));
         activity.finish();
+    }
+
+    private void startEditDeviceActivity(long deviceId) {
+        startActivity(new Intent(getContext(), EditDeviceActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId));
+    }
+
+    private void removeDevice(final long deviceId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Are you sure?");
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                final MainApplication application = (MainApplication) getActivity().getApplication();
+                final WebService service = application.getService();
+                service.removeDevice(deviceId).enqueue(new WebServiceCallback<Void>(getContext()) {
+                    @Override
+                    public void onSuccess(Response<Void> response) {
+                        Toast.makeText(getContext(), R.string.device_removed, Toast.LENGTH_LONG).show();
+                    }
+                });
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void startSendCommandActivity(long deviceId) {
