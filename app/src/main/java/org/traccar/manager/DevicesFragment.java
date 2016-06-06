@@ -16,19 +16,23 @@
 package org.traccar.manager;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.traccar.manager.model.Device;
@@ -59,20 +63,29 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         }
     }
 
-    private FloatingActionButton addButton;
-
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
-        addButton = (FloatingActionButton) container.findViewById(R.id.addButton);
+        FrameLayout root = (FrameLayout)view;
+        final Context context = getActivity();
+        FloatingActionButton addButton = new FloatingActionButton(context);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.BOTTOM | Gravity.END;
+        float scaleRatio = getResources().getDisplayMetrics().density;
+        float marginInPixel = getResources().getDimension(R.dimen.fab_margin);
+        int margin = (int)(marginInPixel / scaleRatio);
+        params.setMargins(margin, margin, margin, margin);
+        addButton.setLayoutParams(params);
+        addButton.setImageResource(android.R.drawable.ic_input_add);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startEditDeviceActivity(0);
             }
         });
+        root.addView(addButton);
 
         return view;
     }
