@@ -94,6 +94,10 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        refreshDevices();
+    }
+
+    private void refreshDevices() {
         final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
@@ -170,6 +174,7 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
                     @Override
                     public void onSuccess(Response<Void> response) {
                         Toast.makeText(getContext(), R.string.device_removed, Toast.LENGTH_LONG).show();
+                        refreshDevices();
                     }
                 });
                 dialog.dismiss();
