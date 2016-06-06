@@ -84,6 +84,7 @@ public class EditDeviceFragment extends Fragment {
                         @Override
                         public void onSuccess(Response<Device> response) {
                             Toast.makeText(getContext(), R.string.device_created, Toast.LENGTH_LONG).show();
+                            getActivity().setResult(0);
                             getActivity().finish();
                         }
                     });
@@ -94,6 +95,7 @@ public class EditDeviceFragment extends Fragment {
                         @Override
                         public void onSuccess(Response<Device> response) {
                             Toast.makeText(getContext(), R.string.device_updated, Toast.LENGTH_LONG).show();
+                            getActivity().setResult(0);
                             getActivity().finish();
                         }
                     });

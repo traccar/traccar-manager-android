@@ -97,7 +97,7 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         refreshDevices();
     }
 
-    private void refreshDevices() {
+    public void refreshDevices() {
         final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
@@ -160,7 +160,7 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
     }
 
     private void startEditDeviceActivity(long deviceId) {
-        startActivity(new Intent(getContext(), EditDeviceActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId));
+        startActivityForResult(new Intent(getContext(), EditDeviceActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId), 0);
     }
 
     private void removeDevice(final long deviceId) {

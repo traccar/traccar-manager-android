@@ -15,12 +15,15 @@
  */
 package org.traccar.manager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 public class DevicesActivity extends AppCompatActivity {
+
+    private DevicesFragment devicesFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,9 +36,10 @@ public class DevicesActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         if (savedInstanceState == null) {
+            devicesFragment = new DevicesFragment();
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.content_layout, new DevicesFragment())
+                    .add(R.id.content_layout, devicesFragment)
                     .commit();
         }
     }
@@ -49,4 +53,10 @@ public class DevicesActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(devicesFragment != null) {
+            devicesFragment.refreshDevices();
+        }
+    }
 }
