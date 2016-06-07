@@ -116,7 +116,7 @@ public class SendCommandFragment extends Fragment {
         commandsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(view.getTag().toString().equals(Command.TYPE_POSITION_PERIODIC)) {
+                if (view.getTag().toString().equals(Command.TYPE_POSITION_PERIODIC)) {
                     frequencyGroup.setVisibility(View.VISIBLE);
                     unitGroup.setVisibility(View.VISIBLE);
                 } else {
@@ -188,7 +188,7 @@ public class SendCommandFragment extends Fragment {
         String result = key;
 
         Integer resId = i10nMapping.get(key);
-        if(resId != null) {
+        if (resId != null) {
             try {
                 CharSequence nameCharSequence = getContext().getResources().getText(resId);
                 result = nameCharSequence.toString();

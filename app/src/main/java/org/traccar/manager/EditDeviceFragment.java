@@ -52,14 +52,14 @@ public class EditDeviceFragment extends Fragment {
         saveButton = (Button) view.findViewById(R.id.button_save);
 
         final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
-        if(deviceId != 0) {
+        if (deviceId != 0) {
             final MainApplication application = (MainApplication) getActivity().getApplication();
             final WebService service = application.getService();
             service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                 @Override
                 public void onSuccess(Response<List<Device>> response) {
                     for (Device device: response.body()) {
-                        if(device.getId() == deviceId) {
+                        if (device.getId() == deviceId) {
                             EditDeviceFragment.this.device = device;
                             nameEditText.setText(device.getName());
                             identifierEditText.setText(device.getUniqueId());
@@ -76,7 +76,7 @@ public class EditDeviceFragment extends Fragment {
                 final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
 
-                if(device == null) {
+                if (device == null) {
                     device = new Device();
                     device.setName(nameEditText.getText().toString());
                     device.setUniqueId(identifierEditText.getText().toString());

@@ -23,8 +23,6 @@ import android.view.MenuItem;
 
 public class DevicesActivity extends AppCompatActivity {
 
-    private DevicesFragment devicesFragment;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,10 +34,9 @@ public class DevicesActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         if (savedInstanceState == null) {
-            devicesFragment = new DevicesFragment();
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.content_layout, devicesFragment)
+                    .add(R.id.content_layout, new DevicesFragment())
                     .commit();
         }
     }
@@ -55,7 +52,8 @@ public class DevicesActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(devicesFragment != null) {
+        DevicesFragment devicesFragment = (DevicesFragment)getSupportFragmentManager().findFragmentById(R.id.content_layout);
+        if (devicesFragment != null) {
             devicesFragment.refreshDevices();
         }
     }

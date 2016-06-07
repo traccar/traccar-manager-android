@@ -139,14 +139,14 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
     private String formatDetails(Position position) {
         FragmentActivity activity = getActivity();
-        if(activity == null) {
+        if (activity == null) {
             return "";
         }
         final MainApplication application = (MainApplication) activity.getApplication();
         final User user = application.getUser();
 
         SimpleDateFormat dateFormat = null;
-        if(user.getTwelveHourFormat()) {
+        if (user.getTwelveHourFormat()) {
             dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
         } else {
             dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -154,13 +154,13 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
         String speedUnit = "";
         double factor = 1;
-        if(user.getSpeedUnit().equals("kn")) {
+        if (user.getSpeedUnit().equals("kn")) {
             speedUnit = getString(R.string.user_kn);
             factor = 1;
-        } else if(user.getSpeedUnit().equals("kmh")) {
+        } else if (user.getSpeedUnit().equals("kmh")) {
             speedUnit = getString(R.string.user_kmh);
             factor = 1.852;
-        } else if(user.getSpeedUnit().equals("mph")) {
+        } else if (user.getSpeedUnit().equals("mph")) {
             speedUnit = getString(R.string.user_mph);
             factor = 1.15078;
         }
