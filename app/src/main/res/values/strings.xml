@@ -12,6 +12,7 @@
     <string name="error_invalid_frequency">Frequency must be a valid number</string>
 
     <string name="devices_title">Devices</string>
+    <string name="confirmation_title">Are you sure?</string>
     <string name="edit_device_title">Edit device</string>
     <string name="send_command_title">Send command</string>
     <string name="settings_title">Settings</string>

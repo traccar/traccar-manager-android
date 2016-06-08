@@ -164,9 +164,8 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
     }
 
     private void removeDevice(final long deviceId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Are you sure?");
-        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        ConfirmationDialogFragment confirmationDialogFragment = new ConfirmationDialogFragment();
+        confirmationDialogFragment.setPositiveListener(new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
@@ -180,13 +179,12 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+        confirmationDialogFragment.setNegativeListener(new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
             }
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        confirmationDialogFragment.show(getFragmentManager(), "Confirmation");
     }
 
     private void startSendCommandActivity(long deviceId) {
