@@ -19,15 +19,29 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDexApplication;
+import android.util.Log;
 
 import org.traccar.manager.model.User;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.HttpUrl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
@@ -36,6 +50,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class MainApplication extends MultiDexApplication {
 
+    public static final String PREFERENCE_TRUSTALLCERTIFICATES = "trustallcertificates";
+    public static final String PREFERENCE_TRUSTALLHOSTS = "trustallhosts";
     public static final String PREFERENCE_AUTHENTICATED = "authenticated";
     public static final String PREFERENCE_URL = "url";
     public static final String PREFERENCE_EMAIL = "email";
@@ -85,6 +101,50 @@ public class MainApplication extends MultiDexApplication {
         }
     }
 
+    private void initSSL(OkHttpClient.Builder builder) {
+        final boolean trustAllCertificates = preferences.getBoolean(PREFERENCE_TRUSTALLCERTIFICATES, false);
+        final boolean trustAllHosts = preferences.getBoolean(PREFERENCE_TRUSTALLHOSTS, false);
+
+        if(trustAllCertificates) {
+            final TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[]{};
+                        }
+                    }
+            };
+
+            try {
+                SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new SecureRandom());
+                builder.sslSocketFactory(sslContext.getSocketFactory());
+            } catch (NoSuchAlgorithmException e) {
+                Log.w(MainApplication.class.getSimpleName(), e);
+            } catch (KeyManagementException e) {
+                Log.w(MainApplication.class.getSimpleName(), e);
+            }
+        }
+
+        if(trustAllHosts) {
+            HostnameVerifier trustAllHostsVerifier = new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            };
+            builder.hostnameVerifier(trustAllHostsVerifier);
+        }
+    }
+
     private void initService() {
         final String url = preferences.getString(PREFERENCE_URL, null);
         String email = preferences.getString(PREFERENCE_EMAIL, null);
@@ -92,9 +152,13 @@ public class MainApplication extends MultiDexApplication {
 
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        client = new OkHttpClient.Builder()
-                .readTimeout(0, TimeUnit.MILLISECONDS)
-                .cookieJar(new JavaNetCookieJar(cookieManager)).build();
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.readTimeout(0, TimeUnit.MILLISECONDS);
+        builder.cookieJar(new JavaNetCookieJar(cookieManager)).build();
+        if(HttpUrl.parse(url).isHttps()) {
+            initSSL(builder);
+        }
+        client = builder.build();
 
         retrofit = new Retrofit.Builder()
                 .client(client)

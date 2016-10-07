@@ -11,4 +11,16 @@
         android:hint="@string/settings_url"
         android:inputType="textUri" />
 
+    <CheckBox
+        android:id="@+id/trust_all_certificates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trust all SSL certificates" />
+
+    <CheckBox
+        android:id="@+id/trust_all_hosts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trust all SSL hosts" />
+
 </android.support.design.widget.TextInputLayout>
