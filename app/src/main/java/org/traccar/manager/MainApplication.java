@@ -15,10 +15,10 @@
  */
 package org.traccar.manager;
 
-import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDexApplication;
+import android.widget.Toast;
 
 import org.traccar.manager.model.User;
 
@@ -98,11 +98,19 @@ public class MainApplication extends MultiDexApplication {
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .cookieJar(new JavaNetCookieJar(cookieManager)).build();
 
-        retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(url)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
+        try {
+            retrofit = new Retrofit.Builder()
+                    .client(client)
+                    .baseUrl(url)
+                    .addConverterFactory(JacksonConverterFactory.create())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            for (GetServiceCallback callback : callbacks) {
+                callback.onFailure();
+            }
+            callbacks.clear();
+        }
 
         final WebService service = retrofit.create(WebService.class);
 

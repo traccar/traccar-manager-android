@@ -187,17 +187,19 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         if (update != null && update.positions != null) {
             for (Position position : update.positions) {
                 long deviceId = position.getDeviceId();
-                LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
-                Marker marker = markers.get(deviceId);
-                if (marker == null) {
-                    marker = map.addMarker(new MarkerOptions()
-                            .title(devices.get(deviceId).getName()).position(location));
-                    markers.put(deviceId, marker);
-                } else {
-                    marker.setPosition(location);
+                if (devices.containsKey(deviceId)) {
+                    LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
+                    Marker marker = markers.get(deviceId);
+                    if (marker == null) {
+                        marker = map.addMarker(new MarkerOptions()
+                                .title(devices.get(deviceId).getName()).position(location));
+                        markers.put(deviceId, marker);
+                    } else {
+                        marker.setPosition(location);
+                    }
+                    marker.setSnippet(formatDetails(position));
+                    positions.put(deviceId, position);
                 }
-                marker.setSnippet(formatDetails(position));
-                positions.put(deviceId, position);
             }
         }
     }
@@ -233,7 +235,9 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                     @Override
                     public void onSuccess(retrofit2.Response<List<Device>> response) {
                         for (Device device : response.body()) {
-                            devices.put(device.getId(), device);
+                            if (device != null) {
+                                devices.put(device.getId(), device);
+                            }
                         }
 
                         Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
