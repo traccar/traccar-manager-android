@@ -37,14 +37,18 @@ public abstract class WebServiceCallback<T> implements Callback<T> {
         if (response.isSuccess()) {
             onSuccess(response);
         } else {
-            CharSequence text = context.getResources().getText(R.string.error_general);
-            Toast.makeText(context, text + ": " + response.message(), Toast.LENGTH_LONG).show();
+            onFailure(call, new ServiceException(response.message()));
         }
     }
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
-        CharSequence text = context.getResources().getText(R.string.error_connection);
+        String text;
+        if (t instanceof ServiceException) {
+            text = context.getString(R.string.error_general);
+        } else {
+            text = context.getString(R.string.error_connection);
+        }
         Toast.makeText(context, text + ": " + t.getMessage(), Toast.LENGTH_LONG).show();
     }
 

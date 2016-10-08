@@ -68,6 +68,11 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
                     }
                 });
             }
+
+            @Override
+            public boolean onFailure() {
+                return false;
+            }
         });
     }
 

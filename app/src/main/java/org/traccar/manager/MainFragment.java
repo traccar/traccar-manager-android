@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -275,6 +274,11 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                         });
                     }
                 });
+            }
+
+            @Override
+            public boolean onFailure() {
+                return false;
             }
         });
     }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Traccar Manager</string>
     <string name="app_login">Login</string>
+    <string name="app_loading">Loading…</string>
 
     <string name="shared_second">Second</string>
     <string name="shared_minute">Minute</string>
@@ -46,5 +47,4 @@
     <string name="command_engine_resume">Engine Resume</string>
     <string name="command_position_periodic">Periodic Reporting</string>
     <string name="command_frequency">Frequency</string>
-
 </resources>

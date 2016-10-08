@@ -16,6 +16,7 @@
 package org.traccar.manager;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,7 +26,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 
 public class LoginFragment extends Fragment {
 
@@ -76,7 +78,7 @@ public class LoginFragment extends Fragment {
         emailInput.setText(preferences.getString(MainApplication.PREFERENCE_EMAIL, null));
 
         if (preferences.getBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false)) {
-            startMainActivity();
+            login();
         }
 
         view.findViewById(R.id.button_settings).setOnClickListener(new View.OnClickListener() {
@@ -117,16 +119,37 @@ public class LoginFragment extends Fragment {
                         .putString(MainApplication.PREFERENCE_PASSWORD, passwordInput.getText().toString())
                         .apply();
 
-                startMainActivity();
+                login();
             }
         });
 
         return view;
     }
 
-    private void startMainActivity() {
-        getActivity().finish();
-        startActivity(new Intent(getContext(), MainActivity.class));
+    private void login() {
+        final ProgressDialog progress = new ProgressDialog(getContext());
+        progress.setMessage(getString(R.string.app_loading));
+        progress.setCancelable(false);
+        progress.show();
+        final MainApplication application = (MainApplication) getActivity().getApplication();
+        application.getServiceAsync(new MainApplication.GetServiceCallback() {
+            @Override
+            public void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service) {
+                if (progress.isShowing()) {
+                    progress.dismiss();
+                }
+                getActivity().finish();
+                startActivity(new Intent(getContext(), MainActivity.class));
+            }
+
+            @Override
+            public boolean onFailure() {
+                if (progress.isShowing()) {
+                    progress.dismiss();
+                }
+                return false;
+            }
+        });
     }
 
 }

@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -45,6 +46,7 @@ public class MainApplication extends MultiDexApplication {
 
     public interface GetServiceCallback {
         void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
+        boolean onFailure();
     }
 
     private SharedPreferences preferences;
@@ -113,6 +115,18 @@ public class MainApplication extends MultiDexApplication {
                     callback.onServiceReady(client, retrofit, service);
                 }
                 callbacks.clear();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                boolean handled = false;
+                for (GetServiceCallback callback : callbacks) {
+                    handled = callback.onFailure();
+                }
+                callbacks.clear();
+                if (!handled) {
+                    super.onFailure(call, t);
+                }
             }
         });
     }
