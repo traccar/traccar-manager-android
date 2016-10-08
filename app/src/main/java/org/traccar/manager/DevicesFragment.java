@@ -73,16 +73,10 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
 
     @Override
     public void onClick(final View view) {
-        view.post(new Runnable() {
-            @Override
-            public void run() {
-                showPopupMenu(view);
-            }
-        });
+        finishDevicesActivity(((Device) view.getTag()).getId());
     }
 
     private void showPopupMenu(View view) {
-        final PopupAdapter adapter = (PopupAdapter) getListAdapter();
         final Device device = (Device) view.getTag();
         PopupMenu popup = new PopupMenu(getActivity(), view);
 
@@ -115,4 +109,5 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
     private void startSendCommandActivity(long deviceId) {
         startActivity(new Intent(getContext(), SendCommandActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId));
     }
+
 }
