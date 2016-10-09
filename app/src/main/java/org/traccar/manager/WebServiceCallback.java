@@ -34,7 +34,7 @@ public abstract class WebServiceCallback<T> implements Callback<T> {
 
     @Override
     public void onResponse(Call<T> call, Response<T> response) {
-        if (response.isSuccess()) {
+        if (response.isSuccessful()) {
             onSuccess(response);
         } else {
             onFailure(call, new ServiceException(response.message()));
