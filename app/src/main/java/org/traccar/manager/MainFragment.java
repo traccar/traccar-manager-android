@@ -147,21 +147,23 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
             dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
 
-        String speedUnit;
-        double factor;
-        switch (user.getSpeedUnit()) {
-            case "kmh":
-                speedUnit = getString(R.string.user_kmh);
-                factor = 1.852;
-                break;
-            case "mph":
-                speedUnit = getString(R.string.user_mph);
-                factor = 1.15078;
-                break;
-            default:
-                speedUnit = getString(R.string.user_kn);
-                factor = 1;
-                break;
+        String speedUnit = getString(R.string.user_kn);
+        double factor = 1;
+        if (user.getSpeedUnit() != null) {
+            switch (user.getSpeedUnit()) {
+                case "kmh":
+                    speedUnit = getString(R.string.user_kmh);
+                    factor = 1.852;
+                    break;
+                case "mph":
+                    speedUnit = getString(R.string.user_mph);
+                    factor = 1.15078;
+                    break;
+                default:
+                    speedUnit = getString(R.string.user_kn);
+                    factor = 1;
+                    break;
+            }
         }
         double speed = position.getSpeed() * factor;
 
