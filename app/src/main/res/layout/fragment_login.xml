@@ -16,7 +16,7 @@
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
             android:padding="?attr/dialogPreferredPadding"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:text="@string/app_name" />
 
         <ImageView
