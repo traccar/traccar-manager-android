@@ -46,7 +46,7 @@ public class DevicesFragment extends ListFragment {
                 service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
                     @Override
                     public void onSuccess(Response<List<Device>> response) {
-                        setListAdapter(new ArrayAdapter<>(application, R.layout.list_item, android.R.id.text1, response.body()));
+                        setListAdapter(new ArrayAdapter<>(getContext(), R.layout.list_item, android.R.id.text1, response.body()));
                     }
                 });
             }
