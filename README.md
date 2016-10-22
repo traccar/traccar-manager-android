@@ -2,15 +2,13 @@
 
 [![](https://play.google.com/intl/en_us/badges/images/badge_new.png)](https://play.google.com/store/apps/details?id=org.traccar.manager)
 
-## Contacts
-
-Author - Anton Tananaev ([anton.tananaev@gmail.com](mailto:anton.tananaev@gmail.com))
-
-Website - [https://www.traccar.org](https://www.traccar.org)
-
 ## Overview
 
-Coming soon...
+Traccar Manager is a mobile application to manage GPS tracking devices. It requires a Traccar server instance to work.
+
+## Team
+
+- Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
 
 ## License
 
