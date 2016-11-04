@@ -16,25 +16,18 @@
  */
 package org.traccar.manager;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-public class MainActivity extends Activity {
-
-    public static final String PREFERENCE_URL = "url";
+public class StartFragment extends Fragment {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        String url = PreferenceManager.getDefaultSharedPreferences(this).getString(PREFERENCE_URL, null);
-        if (url != null) {
-            getFragmentManager().beginTransaction().add(android.R.id.content, new MainFragment()).commit();
-        } else {
-            getFragmentManager().beginTransaction().add(android.R.id.content, new StartFragment()).commit();
-        }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_start, container, false);
+        return view;
     }
 
 }
