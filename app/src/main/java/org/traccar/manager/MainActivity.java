@@ -28,7 +28,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState == null) {
+            initContent();
+        }
+    }
 
+    private void initContent() {
         String url = PreferenceManager.getDefaultSharedPreferences(this).getString(PREFERENCE_URL, null);
         if (url != null) {
             getFragmentManager().beginTransaction().add(android.R.id.content, new MainFragment()).commit();
