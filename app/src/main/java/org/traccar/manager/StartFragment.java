@@ -1,33 +1,119 @@
 /*
  * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.traccar.manager;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
-public class StartFragment extends Fragment {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class StartFragment extends Fragment implements View.OnClickListener {
+
+    private static final String TAG = StartFragment.class.getSimpleName();
+
+    private EditText serverField;
+    private Button startButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_start, container, false);
+        serverField = (EditText) view.findViewById(R.id.field_server);
+        startButton = (Button) view.findViewById(R.id.button_start);
+        startButton.setOnClickListener(this);
         return view;
+    }
+
+    @Override
+    public void onClick(View view) {
+        startButton.setEnabled(false);
+
+        new AsyncTask<String, Void, Boolean>() {
+
+            @Override
+            protected Boolean doInBackground(String... urls) {
+                try {
+
+                    URL url = new URL(urls[0] + "/api/server");
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+                    String line;
+                    StringBuilder responseBuilder = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        responseBuilder.append(line);
+                    }
+
+                    new JSONObject(responseBuilder.toString());
+
+                    return true;
+
+                } catch (IOException | JSONException e) {
+                    Log.w(TAG, e);
+                }
+                return false;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if (result) {
+                    onSuccess();
+                } else {
+                    onError();
+                }
+            }
+
+        }.execute(serverField.getText().toString());
+    }
+
+    private void onSuccess() {
+        PreferenceManager.getDefaultSharedPreferences(getActivity())
+                .edit().putString(MainActivity.PREFERENCE_URL, serverField.getText().toString()).apply();
+        getActivity().getFragmentManager()
+                .beginTransaction().replace(android.R.id.content, new MainFragment()).commit();
+    }
+
+    private void onError() {
+        startButton.setEnabled(true);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+        alertDialog.setMessage(getString(R.string.error_connection));
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(android.R.string.ok),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 
 }
