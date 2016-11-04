@@ -33,8 +33,7 @@ public class MainActivity extends Activity {
     }
 
     private void initContent() {
-        String url = PreferenceManager.getDefaultSharedPreferences(this).getString(PREFERENCE_URL, null);
-        if (url != null) {
+        if (PreferenceManager.getDefaultSharedPreferences(this).contains(PREFERENCE_URL)) {
             getFragmentManager().beginTransaction().add(android.R.id.content, new MainFragment()).commit();
         } else {
             getFragmentManager().beginTransaction().add(android.R.id.content, new StartFragment()).commit();

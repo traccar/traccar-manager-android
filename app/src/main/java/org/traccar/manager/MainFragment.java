@@ -18,6 +18,7 @@ package org.traccar.manager;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -40,7 +41,10 @@ public class MainFragment extends WebViewFragment {
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
 
-        getWebView().loadUrl("http://10.0.2.2:8082");
+        String url = PreferenceManager.getDefaultSharedPreferences(
+                getActivity()).getString(MainActivity.PREFERENCE_URL, null);
+
+        getWebView().loadUrl(url);
     }
 
 }
