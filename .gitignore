@@ -5,3 +5,4 @@ local.properties
 app/app.iml
 build/
 app/build/
+app/src/main/assets
