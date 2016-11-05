@@ -62,6 +62,9 @@ public class MainFragment extends WebViewFragment {
 
         String url = PreferenceManager.getDefaultSharedPreferences(
                 getActivity()).getString(MainActivity.PREFERENCE_URL, null);
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
         serverUri = Uri.parse(url);
 
         getWebView().loadUrl(url);
