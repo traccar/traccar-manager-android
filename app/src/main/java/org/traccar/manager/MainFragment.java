@@ -37,8 +37,6 @@ import java.util.Map;
 
 public class MainFragment extends WebViewFragment {
 
-    private String version = "3.7";
-    private Uri serverUri;
     private AssetManager assetManager;
 
     @Override
@@ -65,7 +63,6 @@ public class MainFragment extends WebViewFragment {
         if (url.endsWith("/")) {
             url = url.substring(0, url.length() - 1);
         }
-        serverUri = Uri.parse(url);
 
         getWebView().loadUrl(url);
     }
@@ -115,19 +112,7 @@ public class MainFragment extends WebViewFragment {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             Uri uri = Uri.parse(url);
-            if (uri.getHost().equals(serverUri.getHost())) {
-                String path = uri.getPath();
-                if (!path.startsWith("/api")) {
-                    if (path.equals("/")) {
-                        path = "/release.html";
-                    }
-                    try {
-                        return loadFileFromAssets(url, "app/" + version + path);
-                    } catch (IOException e) {
-                        return null;
-                    }
-                }
-            } else if (uri.getHost().equals("cdnjs.cloudflare.com")) {
+            if (uri.getHost().equals("cdnjs.cloudflare.com")) {
                 String path = uri.getPath().substring("/ajax/libs".length());
                 try {
                     return loadFileFromAssets(url, "cdnjs" + path);
