@@ -18,6 +18,7 @@ package org.traccar.manager;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -63,7 +64,8 @@ public class StartFragment extends Fragment implements View.OnClickListener {
             protected Boolean doInBackground(String... urls) {
                 try {
 
-                    URL url = new URL(urls[0] + "/api/server");
+                    Uri uri = Uri.parse(urls[0]).buildUpon().appendPath("api/server").build();
+                    URL url = new URL(uri.toString());
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 
