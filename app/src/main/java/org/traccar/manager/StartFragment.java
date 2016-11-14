@@ -64,7 +64,7 @@ public class StartFragment extends Fragment implements View.OnClickListener {
             protected Boolean doInBackground(String... urls) {
                 try {
 
-                    Uri uri = Uri.parse(urls[0]).buildUpon().appendPath("api/server").build();
+                    Uri uri = Uri.parse(urls[0]).buildUpon().appendEncodedPath("api/server").build();
                     URL url = new URL(uri.toString());
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));

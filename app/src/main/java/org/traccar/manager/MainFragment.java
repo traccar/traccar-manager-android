@@ -109,7 +109,8 @@ public class MainFragment extends WebViewFragment {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             Uri uri = Uri.parse(url);
-            if (uri.getHost().equals("cdnjs.cloudflare.com")) {
+            String host = uri.getHost();
+            if (host != null && host.equals("cdnjs.cloudflare.com")) {
                 String path = uri.getPath().substring("/ajax/libs".length());
                 try {
                     return loadFileFromAssets(url, "cdnjs" + path);
