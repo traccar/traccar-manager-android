@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "org.traccar.manager"
-        minSdkVersion 14
+        minSdkVersion 19
         targetSdkVersion 24
         versionCode 10
         versionName "2.0"
