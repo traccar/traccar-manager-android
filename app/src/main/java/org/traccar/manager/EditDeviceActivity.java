@@ -18,7 +18,7 @@ package org.traccar.manager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-public class EditDeviceActivity extends AppCompatActivity {
+public class EditDeviceActivity extends AppCompatActivity implements EditDeviceFragment.Listener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,4 +33,9 @@ public class EditDeviceActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onDeviceStored(int resultCode) {
+        setResult(resultCode);
+        finish();
+    }
 }

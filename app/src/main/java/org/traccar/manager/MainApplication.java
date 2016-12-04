@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -71,8 +72,10 @@ public class MainApplication extends MultiDexApplication {
     public User getUser() { return user; }
 
     public void removeService() {
-        service = null;
         user = null;
+        service = null;
+        retrofit = null;
+        client = null;
     }
 
     @Override
@@ -112,6 +115,17 @@ public class MainApplication extends MultiDexApplication {
                 for (GetServiceCallback callback : callbacks) {
                     callback.onServiceReady(client, retrofit, service);
                 }
+            }
+
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                super.onResponse(call, response);
+                callbacks.clear();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                super.onFailure(call, t);
                 callbacks.clear();
             }
         });

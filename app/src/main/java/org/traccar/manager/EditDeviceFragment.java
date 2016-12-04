@@ -15,6 +15,8 @@
  */
 package org.traccar.manager;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -35,12 +37,29 @@ import retrofit2.Response;
 
 public class EditDeviceFragment extends Fragment {
 
+    public static final String NAME_PARAM = "NameParam";
+    public static final String IDENTIFIER_PARAM = "IdentifierParam";
+
+    public interface Listener {
+        void onDeviceStored(int resultCode);
+    };
+
     public static final String EXTRA_DEVICE_ID = "deviceId";
+
+    private Context context;
+    private MainApplication application;
 
     private Device device;
     private EditText nameEditText;
     private EditText identifierEditText;
     private View saveButton;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+        this.application = (MainApplication) ((Activity)context).getApplication();
+    }
 
     @Nullable
     @Override
@@ -51,18 +70,27 @@ public class EditDeviceFragment extends Fragment {
         identifierEditText = (EditText) view.findViewById(R.id.identifier);
         saveButton = (Button) view.findViewById(R.id.button_save);
 
-        final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
+        final String name;
+        final String identifier;
+        if(savedInstanceState == null) {
+            name = null;
+            identifier = null;
+        } else {
+            name = savedInstanceState.getString(NAME_PARAM);
+            identifier = savedInstanceState.getString(IDENTIFIER_PARAM);
+        }
+
+        final long deviceId = ((EditDeviceActivity)context).getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
         if (deviceId != 0) {
-            final MainApplication application = (MainApplication) getActivity().getApplication();
             final WebService service = application.getService();
-            service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
+            service.getDevices().enqueue(new WebServiceCallback<List<Device>>(context) {
                 @Override
                 public void onSuccess(Response<List<Device>> response) {
                     for (Device device: response.body()) {
                         if (device.getId() == deviceId) {
                             EditDeviceFragment.this.device = device;
-                            nameEditText.setText(device.getName());
-                            identifierEditText.setText(device.getUniqueId());
+                            nameEditText.setText(name == null ? device.getName() : name);
+                            identifierEditText.setText(identifier == null ? device.getUniqueId() : identifier);
                         }
                     }
                 }
@@ -72,31 +100,27 @@ public class EditDeviceFragment extends Fragment {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
 
                 if (device == null) {
                     device = new Device();
                     device.setName(nameEditText.getText().toString());
                     device.setUniqueId(identifierEditText.getText().toString());
-                    service.addDevice(device).enqueue(new WebServiceCallback<Device>(getContext()) {
+                    service.addDevice(device).enqueue(new WebServiceCallback<Device>(context) {
                         @Override
                         public void onSuccess(Response<Device> response) {
-                            Toast.makeText(getContext(), R.string.device_created, Toast.LENGTH_LONG).show();
-                            getActivity().setResult(0);
-                            getActivity().finish();
+                            Toast.makeText(context, R.string.device_created, Toast.LENGTH_LONG).show();
+                            ((EditDeviceActivity)context).onDeviceStored(0);
                         }
                     });
                 } else {
                     device.setName(nameEditText.getText().toString());
                     device.setUniqueId(identifierEditText.getText().toString());
-                    service.updateDevice(device.getId(), device).enqueue(new WebServiceCallback<Device>(getContext()) {
+                    service.updateDevice(device.getId(), device).enqueue(new WebServiceCallback<Device>(context) {
                         @Override
                         public void onSuccess(Response<Device> response) {
-                            Toast.makeText(getContext(), R.string.device_updated, Toast.LENGTH_LONG).show();
-                            getActivity().setResult(0);
-                            getActivity().finish();
+                            Toast.makeText(context, R.string.device_updated, Toast.LENGTH_LONG).show();
+                            ((EditDeviceActivity)context).onDeviceStored(0);
                         }
                     });
                 }
@@ -104,5 +128,12 @@ public class EditDeviceFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(NAME_PARAM, nameEditText.getText().toString());
+        outState.putString(IDENTIFIER_PARAM, identifierEditText.getText().toString());
     }
 }

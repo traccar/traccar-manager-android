@@ -15,11 +15,11 @@
  */
 package org.traccar.manager;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -59,9 +59,15 @@ import retrofit2.Retrofit;
 
 public class MainFragment extends SupportMapFragment implements OnMapReadyCallback {
 
+    public interface Listener {
+        void onLogout();
+    }
+
     public static final int REQUEST_DEVICE = 1;
     public static final int RESULT_SUCCESS = 1;
 
+    private Context context;
+    private MainApplication application;
     private GoogleMap map;
 
     private Handler handler = new Handler();
@@ -72,6 +78,13 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     private Map<Long, Marker> markers = new HashMap<>();
 
     private WebSocketCall webSocket;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+        this.application = (MainApplication) ((Activity)context).getApplication();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,14 +102,10 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_devices:
-                startActivityForResult(new Intent(getContext(), DevicesActivity.class), REQUEST_DEVICE);
+                startActivityForResult(new Intent(context, DevicesActivity.class), REQUEST_DEVICE);
                 return true;
             case R.id.action_logout:
-                PreferenceManager.getDefaultSharedPreferences(getContext())
-                        .edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
-                ((MainApplication) getActivity().getApplication()).removeService();
-                getActivity().finish();
-                startActivity(new Intent(getContext(), LoginActivity.class));
+                ((MainActivity)context).onLogout();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -138,11 +147,6 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private String formatDetails(Position position) {
-        FragmentActivity activity = getActivity();
-        if (activity == null) {
-            return "";
-        }
-        final MainApplication application = (MainApplication) activity.getApplication();
         final User user = application.getUser();
 
         SimpleDateFormat dateFormat = null;
@@ -215,22 +219,19 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (getActivity() != null) {
-                    createWebSocket();
-                }
+                createWebSocket();
             }
         });
     }
 
     private void createWebSocket() {
-        final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
             public void onServiceReady(final OkHttpClient client, final Retrofit retrofit, WebService service) {
                 User user = application.getUser();
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(user.getLatitude(), user.getLongitude()), user.getZoom()));
-                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
+                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(context) {
                     @Override
                     public void onSuccess(retrofit2.Response<List<Device>> response) {
                         for (Device device : response.body()) {

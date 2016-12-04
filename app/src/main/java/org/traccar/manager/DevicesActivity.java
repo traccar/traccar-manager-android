@@ -15,13 +15,17 @@
  */
 package org.traccar.manager;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
-public class DevicesActivity extends AppCompatActivity {
+public class DevicesActivity extends AppCompatActivity implements View.OnClickListener, DialogInterface.OnClickListener, DevicesFragment.Listener {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,8 +57,53 @@ public class DevicesActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         DevicesFragment devicesFragment = (DevicesFragment)getSupportFragmentManager().findFragmentById(R.id.content_layout);
-        if (devicesFragment != null) {
-            devicesFragment.refreshDevices();
+        devicesFragment.refreshDevices();
+    }
+
+    @Override
+    public void onClick(final View view) {
+        switch (view.getId()) {
+            case android.R.id.text1:
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        DevicesFragment devicesFragment = (DevicesFragment)getSupportFragmentManager().findFragmentById(R.id.content_layout);
+                        devicesFragment.showPopupMenu(view);
+                    }
+                });
+                break;
+
+            case android.R.id.button1:
+                onEditDevice(0);
+                break;
         }
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int id) {
+        switch (id) {
+            case DialogInterface.BUTTON_POSITIVE:
+                DevicesFragment devicesFragment = (DevicesFragment)getSupportFragmentManager().findFragmentById(R.id.content_layout);
+                long deviceId = (Long) ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).getTag();
+                devicesFragment.removeDevice(deviceId);
+                break;
+        }
+        dialog.dismiss();
+    }
+
+    @Override
+    public void onEditDevice(long deviceId) {
+        startActivityForResult(new Intent(this, EditDeviceActivity.class).putExtra(DevicesFragment.EXTRA_DEVICE_ID, deviceId), 0);
+    }
+
+    @Override
+    public void onShowOnMap(long deviceId) {
+        setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(DevicesFragment.EXTRA_DEVICE_ID, deviceId));
+        finish();
+    }
+
+    @Override
+    public void onSendCommand(long deviceId) {
+        startActivity(new Intent(this, SendCommandActivity.class).putExtra(DevicesFragment.EXTRA_DEVICE_ID, deviceId));
     }
 }

@@ -18,7 +18,7 @@ package org.traccar.manager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-public class SendCommandActivity extends AppCompatActivity {
+public class SendCommandActivity extends AppCompatActivity implements SendCommandFragment.Listener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,4 +33,8 @@ public class SendCommandActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onCommandSent() {
+        finish();
+    }
 }

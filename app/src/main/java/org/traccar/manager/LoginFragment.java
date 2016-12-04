@@ -16,8 +16,8 @@
 package org.traccar.manager;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -25,7 +25,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +36,11 @@ import okhttp3.HttpUrl;
 
 public class LoginFragment extends Fragment {
 
+    public interface Listener {
+        void onLoginDataProvided();
+    }
+
+    private Context context;
     private TextView emailInput;
     private TextView passwordInput;
     private View loginButton;
@@ -59,6 +63,12 @@ public class LoginFragment extends Fragment {
 
     };
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+    }
+
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,12 +81,12 @@ public class LoginFragment extends Fragment {
         emailInput.addTextChangedListener(textWatcher);
         passwordInput.addTextChangedListener(textWatcher);
 
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         emailInput.setText(preferences.getString(MainApplication.PREFERENCE_EMAIL, null));
 
         if (preferences.getBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false)) {
-            startMainActivity();
+            loginDataProvided();
         }
 
         view.findViewById(R.id.button_settings).setOnClickListener(new View.OnClickListener() {
@@ -87,7 +97,7 @@ public class LoginFragment extends Fragment {
 
                 input.setText(preferences.getString(MainApplication.PREFERENCE_URL, null));
 
-                new AlertDialog.Builder(getContext())
+                new AlertDialog.Builder(context)
                         .setTitle(R.string.settings_title)
                         .setView(dialogView)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -97,7 +107,7 @@ public class LoginFragment extends Fragment {
                                     preferences.edit().putString(
                                             MainApplication.PREFERENCE_URL, url).apply();
                                 } else {
-                                    Toast.makeText(getContext(), R.string.error_invalid_url, Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, R.string.error_invalid_url, Toast.LENGTH_LONG).show();
                                 }
                             }
                         })
@@ -117,16 +127,15 @@ public class LoginFragment extends Fragment {
                         .putString(MainApplication.PREFERENCE_PASSWORD, passwordInput.getText().toString())
                         .apply();
 
-                startMainActivity();
+                loginDataProvided();
             }
         });
 
         return view;
     }
 
-    private void startMainActivity() {
-        getActivity().finish();
-        startActivity(new Intent(getContext(), MainActivity.class));
+    private void loginDataProvided() {
+        ((LoginActivity)context).onLoginDataProvided();
     }
 
 }

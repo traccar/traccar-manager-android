@@ -15,6 +15,8 @@
  */
 package org.traccar.manager;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -28,7 +30,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,12 @@ import java.util.Map;
 import retrofit2.Response;
 
 public class SendCommandFragment extends Fragment {
+
+    public static final String SPINNER_POSITION_PARAM = "SpinnerPositionParam";
+
+    public interface Listener {
+        void onCommandSent();
+    };
 
     class CommandTypeDataHolder {
         private String type;
@@ -63,7 +70,7 @@ public class SendCommandFragment extends Fragment {
     class CommandTypeAdapter extends ArrayAdapter<CommandTypeDataHolder> {
 
         CommandTypeAdapter(List<CommandTypeDataHolder> items) {
-            super(getActivity(), R.layout.list_item, android.R.id.text1, items);
+            super(context, R.layout.list_item, android.R.id.text1, items);
         }
 
         @Override
@@ -91,12 +98,22 @@ public class SendCommandFragment extends Fragment {
 
     public static final String EXTRA_DEVICE_ID = "deviceId";
 
+    private Context context;
+    private MainApplication application;
+
     private Spinner commandsSpinner;
     private LinearLayout frequencyGroup;
     private EditText frequencyEditText;
     private LinearLayout unitGroup;
     private Spinner unitSpinner;
     private View sendButton;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+        this.application = (MainApplication) ((Activity)context).getApplication();
+    }
 
     @Nullable
     @Override
@@ -112,6 +129,13 @@ public class SendCommandFragment extends Fragment {
 
         frequencyGroup.setVisibility(View.GONE);
         unitGroup.setVisibility(View.GONE);
+
+        final int commandsSpinnerPos;
+        if(savedInstanceState == null) {
+            commandsSpinnerPos = 0;
+        } else {
+            commandsSpinnerPos = savedInstanceState.getInt(SPINNER_POSITION_PARAM);
+        }
 
         commandsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -132,10 +156,9 @@ public class SendCommandFragment extends Fragment {
             }
         });
 
-        final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
-        final MainApplication application = (MainApplication) getActivity().getApplication();
+        final long deviceId = ((SendCommandActivity) context).getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
         final WebService service = application.getService();
-        service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getContext()) {
+        service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(context) {
             @Override
             public void onSuccess(Response<List<CommandType>> response) {
                 List<CommandTypeDataHolder> commandTypeDataHolders = new ArrayList<>();
@@ -146,6 +169,7 @@ public class SendCommandFragment extends Fragment {
                 }
 
                 commandsSpinner.setAdapter(new CommandTypeAdapter(commandTypeDataHolders));
+                commandsSpinner.setSelection(commandsSpinnerPos);
             }
         });
 
@@ -161,27 +185,32 @@ public class SendCommandFragment extends Fragment {
                     try {
                         value = Integer.parseInt(frequencyEditText.getText().toString());
                     } catch (NumberFormatException e) {
-                        Toast.makeText(getContext(), R.string.error_invalid_frequency, Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, R.string.error_invalid_frequency, Toast.LENGTH_LONG).show();
                         return;
                     }
                     int multiplier = getResources().getIntArray(R.array.unit_values)[unitSpinner.getSelectedItemPosition()];
                     command.set(Command.KEY_FREQUENCY, value * multiplier);
                 }
 
-                final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
-                service.sendCommand(command).enqueue(new WebServiceCallback<Command>(getContext()) {
+                service.sendCommand(command).enqueue(new WebServiceCallback<Command>(context) {
                     @Override
                     public void onSuccess(Response<Command> response) {
-                        Toast.makeText(getContext(), R.string.command_sent, Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, R.string.command_sent, Toast.LENGTH_LONG).show();
                     }
                 });
 
-                getActivity().finish();
+                ((SendCommandActivity) context).onCommandSent();
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SPINNER_POSITION_PARAM, commandsSpinner.getSelectedItemPosition());
     }
 
     private String getI10nString(String key) {
@@ -190,7 +219,7 @@ public class SendCommandFragment extends Fragment {
         Integer resId = i10nMapping.get(key);
         if (resId != null) {
             try {
-                CharSequence nameCharSequence = getContext().getResources().getText(resId);
+                CharSequence nameCharSequence = context.getResources().getText(resId);
                 result = nameCharSequence.toString();
             } catch (Resources.NotFoundException e) {
                 Log.w(SendCommandFragment.class.getSimpleName(), e);

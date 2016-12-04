@@ -15,11 +15,13 @@
  */
 package org.traccar.manager;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainFragment.Listener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,4 +38,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onLogout() {
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
+        ((MainApplication) getApplication()).removeService();
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
+    }
 }

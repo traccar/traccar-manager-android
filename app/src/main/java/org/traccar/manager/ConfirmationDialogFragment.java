@@ -21,30 +21,59 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.widget.Button;
 
 public class ConfirmationDialogFragment extends DialogFragment {
-    private Context mContext;
-    private DialogInterface.OnClickListener positiveListener;
-    private DialogInterface.OnClickListener negativeListener;
+    private static final String LONG_PARAM_NAME = "LongParam";
 
-    public ConfirmationDialogFragment() {
-        mContext = getActivity();
+    private Context context;
+    private long longParam;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
     }
 
-    public void setPositiveListener(DialogInterface.OnClickListener positiveListener) {
-        this.positiveListener = positiveListener;
-    }
-
-    public void setNegativeListener(DialogInterface.OnClickListener negativeListener) {
-        this.negativeListener = negativeListener;
+    public void setLongParam(long longParam) {
+        this.longParam = longParam;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        if(savedInstanceState != null) {
+            longParam = savedInstanceState.getLong(LONG_PARAM_NAME);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.confirmation_title);
-        builder.setPositiveButton(android.R.string.yes, positiveListener);
-        builder.setNegativeButton(android.R.string.no, negativeListener);
-        return builder.create();
+        builder.setPositiveButton(android.R.string.yes, (DialogInterface.OnClickListener)context);
+        builder.setNegativeButton(android.R.string.no, (DialogInterface.OnClickListener)context);
+        AlertDialog result = builder.create();
+        result.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                AlertDialog alertDialog = ((AlertDialog)dialog);
+                Button positive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                if(positive != null) {
+                    positive.setTag(longParam);
+                }
+                Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                if(negative != null) {
+                    negative.setTag(longParam);
+                }
+                Button neutral = alertDialog.getButton(DialogInterface.BUTTON_NEUTRAL);
+                if(neutral != null) {
+                    neutral.setTag(longParam);
+                }
+            }
+        });
+        return result;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(LONG_PARAM_NAME, longParam);
     }
 }

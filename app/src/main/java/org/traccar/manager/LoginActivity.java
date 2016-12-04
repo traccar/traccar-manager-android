@@ -15,10 +15,11 @@
  */
 package org.traccar.manager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginFragment.Listener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,4 +34,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onLoginDataProvided() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
 }

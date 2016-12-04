@@ -17,14 +17,10 @@ package org.traccar.manager;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -33,7 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import org.traccar.manager.model.Device;
 
@@ -43,14 +38,23 @@ import okhttp3.OkHttpClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class DevicesFragment extends ListFragment implements View.OnClickListener {
+public class DevicesFragment extends ListFragment {
+
+    public interface Listener {
+        void onEditDevice(long deviceId);
+        void onShowOnMap(long deviceId);
+        void onSendCommand(long deviceId);
+    }
 
     public static final String EXTRA_DEVICE_ID = "deviceId";
+
+    private Context context;
+    private MainApplication application;
 
     class PopupAdapter extends ArrayAdapter<Device> {
 
         PopupAdapter(List<Device> items) {
-            super(getActivity(), R.layout.list_item, android.R.id.text1, items);
+            super(context, R.layout.list_item, android.R.id.text1, items);
         }
 
         @Override
@@ -58,9 +62,16 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
             View view = super.getView(position, convertView, container);
             View popupText = view.findViewById(android.R.id.text1);
             popupText.setTag(getItem(position));
-            popupText.setOnClickListener(DevicesFragment.this);
+            popupText.setOnClickListener((DevicesActivity)context);
             return view;
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+        this.application = (MainApplication) ((Activity)context).getApplication();
     }
 
     @Nullable
@@ -69,7 +80,6 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
         FrameLayout root = (FrameLayout)view;
-        final Context context = getActivity();
         FloatingActionButton addButton = new FloatingActionButton(context);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.BOTTOM | Gravity.END;
@@ -78,13 +88,9 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         int margin = (int)(marginInPixel / scaleRatio);
         params.setMargins(margin, margin, margin, margin);
         addButton.setLayoutParams(params);
+        addButton.setId(android.R.id.button1);
         addButton.setImageResource(android.R.drawable.ic_input_add);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startEditDeviceActivity(0);
-            }
-        });
+        addButton.setOnClickListener((DevicesActivity)context);
         root.addView(addButton);
 
         return view;
@@ -98,11 +104,10 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
     }
 
     public void refreshDevices() {
-        final MainApplication application = (MainApplication) getActivity().getApplication();
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
             public void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service) {
-                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(getContext()) {
+                service.getDevices().enqueue(new WebServiceCallback<List<Device>>(context) {
                     @Override
                     public void onSuccess(Response<List<Device>> response) {
                         setListAdapter(new PopupAdapter(response.body()));
@@ -112,20 +117,10 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         });
     }
 
-    @Override
-    public void onClick(final View view) {
-        view.post(new Runnable() {
-            @Override
-            public void run() {
-                showPopupMenu(view);
-            }
-        });
-    }
-
-    private void showPopupMenu(View view) {
+    public void showPopupMenu(View view) {
         final PopupAdapter adapter = (PopupAdapter) getListAdapter();
         final Device device = (Device) view.getTag();
-        PopupMenu popup = new PopupMenu(getActivity(), view);
+        PopupMenu popup = new PopupMenu(context, view);
 
         popup.getMenuInflater().inflate(R.menu.popup, popup.getMenu());
 
@@ -134,16 +129,16 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_edit_device:
-                        startEditDeviceActivity(device.getId());
+                        ((DevicesActivity)context).onEditDevice(device.getId());
                         return true;
                     case R.id.action_remove_device:
-                        removeDevice(device.getId());
+                        onRemoveDeviceAction(device.getId());
                         return true;
                     case R.id.action_show_on_map:
-                        finishDevicesActivity(device.getId());
+                        ((DevicesActivity)context).onShowOnMap(device.getId());
                         return true;
                     case R.id.action_send_command:
-                        startSendCommandActivity(device.getId());
+                        ((DevicesActivity)context).onSendCommand(device.getId());
                         return true;
                 }
                 return false;
@@ -153,41 +148,20 @@ public class DevicesFragment extends ListFragment implements View.OnClickListene
         popup.show();
     }
 
-    private void finishDevicesActivity(long deviceId) {
-        Activity activity = getActivity();
-        activity.setResult(MainFragment.RESULT_SUCCESS, new Intent().putExtra(EXTRA_DEVICE_ID, deviceId));
-        activity.finish();
-    }
-
-    private void startEditDeviceActivity(long deviceId) {
-        startActivityForResult(new Intent(getContext(), EditDeviceActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId), 0);
-    }
-
-    private void removeDevice(final long deviceId) {
+    private void onRemoveDeviceAction(final long deviceId) {
         ConfirmationDialogFragment confirmationDialogFragment = new ConfirmationDialogFragment();
-        confirmationDialogFragment.setPositiveListener(new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                final MainApplication application = (MainApplication) getActivity().getApplication();
-                final WebService service = application.getService();
-                service.removeDevice(deviceId).enqueue(new WebServiceCallback<Void>(getContext()) {
-                    @Override
-                    public void onSuccess(Response<Void> response) {
-                        Toast.makeText(getContext(), R.string.device_removed, Toast.LENGTH_LONG).show();
-                        refreshDevices();
-                    }
-                });
-                dialog.dismiss();
-            }
-        });
-        confirmationDialogFragment.setNegativeListener(new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
-            }
-        });
+        confirmationDialogFragment.setLongParam(deviceId);
         confirmationDialogFragment.show(getFragmentManager(), "Confirmation");
     }
 
-    private void startSendCommandActivity(long deviceId) {
-        startActivity(new Intent(getContext(), SendCommandActivity.class).putExtra(EXTRA_DEVICE_ID, deviceId));
+    public void removeDevice(final long deviceId) {
+        final WebService service = application.getService();
+        service.removeDevice(deviceId).enqueue(new WebServiceCallback<Void>(context) {
+            @Override
+            public void onSuccess(Response<Void> response) {
+                Toast.makeText(context, R.string.device_removed, Toast.LENGTH_LONG).show();
+                refreshDevices();
+            }
+        });
     }
 }
