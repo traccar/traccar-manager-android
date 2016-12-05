@@ -15,10 +15,10 @@
  */
 package org.traccar.manager;
 
-import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDexApplication;
+import android.widget.Toast;
 
 import org.traccar.manager.model.User;
 
@@ -46,6 +46,7 @@ public class MainApplication extends MultiDexApplication {
 
     public interface GetServiceCallback {
         void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
+        boolean onFailure();
     }
 
     private SharedPreferences preferences;
@@ -99,11 +100,19 @@ public class MainApplication extends MultiDexApplication {
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .cookieJar(new JavaNetCookieJar(cookieManager)).build();
 
-        retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(url)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
+        try {
+            retrofit = new Retrofit.Builder()
+                    .client(client)
+                    .baseUrl(url)
+                    .addConverterFactory(JacksonConverterFactory.create())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            for (GetServiceCallback callback : callbacks) {
+                callback.onFailure();
+            }
+            callbacks.clear();
+        }
 
         final WebService service = retrofit.create(WebService.class);
 
@@ -125,8 +134,14 @@ public class MainApplication extends MultiDexApplication {
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                super.onFailure(call, t);
+                boolean handled = false;
+                for (GetServiceCallback callback : callbacks) {
+                    handled = callback.onFailure();
+                }
                 callbacks.clear();
+                if (!handled) {
+                    super.onFailure(call, t);
+                }
             }
         });
     }

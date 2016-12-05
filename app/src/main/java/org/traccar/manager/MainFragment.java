@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -149,24 +150,28 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     private String formatDetails(Position position) {
         final User user = application.getUser();
 
-        SimpleDateFormat dateFormat = null;
+        SimpleDateFormat dateFormat;
         if (user.getTwelveHourFormat()) {
             dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
         } else {
             dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
 
-        String speedUnit = "";
-        double factor = 1;
-        if (user.getSpeedUnit().equals("kn")) {
-            speedUnit = getString(R.string.user_kn);
-            factor = 1;
-        } else if (user.getSpeedUnit().equals("kmh")) {
-            speedUnit = getString(R.string.user_kmh);
-            factor = 1.852;
-        } else if (user.getSpeedUnit().equals("mph")) {
-            speedUnit = getString(R.string.user_mph);
-            factor = 1.15078;
+        String speedUnit;
+        double factor;
+        switch (user.getSpeedUnit()) {
+            case "kmh":
+                speedUnit = getString(R.string.user_kmh);
+                factor = 1.852;
+                break;
+            case "mph":
+                speedUnit = getString(R.string.user_mph);
+                factor = 1.15078;
+                break;
+            default:
+                speedUnit = getString(R.string.user_kn);
+                factor = 1;
+                break;
         }
         double speed = position.getSpeed() * factor;
 
@@ -192,17 +197,19 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         if (update != null && update.positions != null) {
             for (Position position : update.positions) {
                 long deviceId = position.getDeviceId();
-                LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
-                Marker marker = markers.get(deviceId);
-                if (marker == null) {
-                    marker = map.addMarker(new MarkerOptions()
-                            .title(devices.get(deviceId).getName()).position(location));
-                    markers.put(deviceId, marker);
-                } else {
-                    marker.setPosition(location);
+                if (devices.containsKey(deviceId)) {
+                    LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
+                    Marker marker = markers.get(deviceId);
+                    if (marker == null) {
+                        marker = map.addMarker(new MarkerOptions()
+                                .title(devices.get(deviceId).getName()).position(location));
+                        markers.put(deviceId, marker);
+                    } else {
+                        marker.setPosition(location);
+                    }
+                    marker.setSnippet(formatDetails(position));
+                    positions.put(deviceId, position);
                 }
-                marker.setSnippet(formatDetails(position));
-                positions.put(deviceId, position);
             }
         }
     }
@@ -235,7 +242,9 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                     @Override
                     public void onSuccess(retrofit2.Response<List<Device>> response) {
                         for (Device device : response.body()) {
-                            devices.put(device.getId(), device);
+                            if (device != null) {
+                                devices.put(device.getId(), device);
+                            }
                         }
 
                         Request request = new Request.Builder().url(retrofit.baseUrl().url().toString() + "api/socket").build();
@@ -276,6 +285,11 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
                         });
                     }
                 });
+            }
+
+            @Override
+            public boolean onFailure() {
+                return false;
             }
         });
     }

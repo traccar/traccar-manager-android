@@ -114,11 +114,15 @@ public class DevicesFragment extends ListFragment {
                     }
                 });
             }
+
+            @Override
+            public boolean onFailure() {
+                return false;
+            }
         });
     }
 
     public void showPopupMenu(View view) {
-        final PopupAdapter adapter = (PopupAdapter) getListAdapter();
         final Device device = (Device) view.getTag();
         PopupMenu popup = new PopupMenu(context, view);
 
@@ -164,4 +168,5 @@ public class DevicesFragment extends ListFragment {
             }
         });
     }
+
 }
