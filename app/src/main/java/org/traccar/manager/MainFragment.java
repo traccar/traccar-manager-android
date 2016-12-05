@@ -157,20 +157,20 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
             dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
 
-        String speedUnit = getString(R.string.user_kn);
+        String speedUnit = context.getString(R.string.user_kn);
         double factor = 1;
         if (user.getSpeedUnit() != null) {
             switch (user.getSpeedUnit()) {
                 case "kmh":
-                    speedUnit = getString(R.string.user_kmh);
+                    speedUnit = context.getString(R.string.user_kmh);
                     factor = 1.852;
                     break;
                 case "mph":
-                    speedUnit = getString(R.string.user_mph);
+                    speedUnit = context.getString(R.string.user_mph);
                     factor = 1.15078;
                     break;
                 default:
-                    speedUnit = getString(R.string.user_kn);
+                    speedUnit = context.getString(R.string.user_kn);
                     factor = 1;
                     break;
             }
@@ -178,18 +178,18 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         double speed = position.getSpeed() * factor;
 
         return new StringBuilder()
-                .append(getString(R.string.position_time)).append(": ")
+                .append(context.getString(R.string.position_time)).append(": ")
                 .append(dateFormat.format(position.getFixTime())).append('\n')
-                .append(getString(R.string.position_latitude)).append(": ")
+                .append(context.getString(R.string.position_latitude)).append(": ")
                 .append(String.format("%.5f", position.getLatitude())).append('\n')
-                .append(getString(R.string.position_longitude)).append(": ")
+                .append(context.getString(R.string.position_longitude)).append(": ")
                 .append(String.format("%.5f", position.getLongitude())).append('\n')
-                .append(getString(R.string.position_altitude)).append(": ")
+                .append(context.getString(R.string.position_altitude)).append(": ")
                 .append(String.format("%.1f", position.getAltitude())).append('\n')
-                .append(getString(R.string.position_speed)).append(": ")
+                .append(context.getString(R.string.position_speed)).append(": ")
                 .append(String.format("%.1f", speed)).append(' ')
                 .append(speedUnit).append('\n')
-                .append(getString(R.string.position_course)).append(": ")
+                .append(context.getString(R.string.position_course)).append(": ")
                 .append(String.format("%.1f", position.getCourse()))
                 .toString();
     }
