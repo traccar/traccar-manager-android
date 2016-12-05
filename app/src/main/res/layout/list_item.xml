@@ -10,6 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
 </RelativeLayout>

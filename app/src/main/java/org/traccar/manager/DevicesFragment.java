@@ -29,7 +29,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
+
 import org.traccar.manager.model.Device;
 
 import java.util.List;
@@ -38,7 +40,7 @@ import okhttp3.OkHttpClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class DevicesFragment extends ListFragment {
+public class DevicesFragment extends ListFragment implements View.OnClickListener {
 
     public interface Listener {
         void onEditDevice(long deviceId);
@@ -118,6 +120,16 @@ public class DevicesFragment extends ListFragment {
             @Override
             public boolean onFailure() {
                 return false;
+            }
+        });
+    }
+
+    @Override
+    public void onClick(final View view) {
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                showPopupMenu(view);
             }
         });
     }

@@ -10,14 +10,14 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceLarge"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
         tools:text="Title" />
 
     <TextView
         android:id="@+id/details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceSmall"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         tools:text="Speed: 0.0\nCourse: 0" />
 
 </LinearLayout>
