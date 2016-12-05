@@ -1,26 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "org.traccar.manager"
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 5
         versionName "1.3"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
-    }
-
-    signingConfigs {
-        release {
-            storeFile file('../../android.keystore')
-            keyAlias 'tananaev'
-            storePassword ''
-            keyPassword ''
-        }
     }
 
     dexOptions {
@@ -28,39 +19,28 @@ android {
         javaMaxHeapSize "4g"
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            signingConfig signingConfigs.release
-        }
-    }
-
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
+        }
     }
 }
 
 dependencies {
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.google.android.gms:play-services:9.0.1'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:design:24.0.0'
+    compile 'com.google.android.gms:play-services:9.0.2'
     compile 'com.squareup.okhttp3:okhttp-ws:3.2.0'
     compile "com.squareup.okhttp3:okhttp-urlconnection:3.2.0"
     compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
     compile 'com.squareup.retrofit2:converter-jackson:2.0.0-beta4'
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'
-}
-
-task requestPasswords << {
-    android.signingConfigs.release.storePassword = new String(System.console().readPassword('\nStore password: '))
-    android.signingConfigs.release.keyPassword = new String(System.console().readPassword('Key password: '))
-}
-
-tasks.whenTaskAdded { theTask ->
-    if (theTask.name.equals('packageRelease')) {
-        theTask.dependsOn 'requestPasswords'
-    }
 }
