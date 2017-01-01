@@ -6,3 +6,5 @@ app/app.iml
 build/
 app/build/
 app/src/main/assets
+.DS_Store
+
