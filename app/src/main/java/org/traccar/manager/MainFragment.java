@@ -15,15 +15,19 @@
  */
 package org.traccar.manager;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -37,6 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainFragment extends WebViewFragment {
+
+    private final static int REQUEST_FILE_CHOOSER = 1;
 
     private AssetManager assetManager;
 
@@ -53,6 +59,7 @@ public class MainFragment extends WebViewFragment {
         }
 
         getWebView().setWebViewClient(webViewClient);
+        getWebView().setWebChromeClient(webChromeClient);
 
         WebSettings webSettings = getWebView().getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -120,6 +127,66 @@ public class MainFragment extends WebViewFragment {
                 }
             }
             return null;
+        }
+
+    };
+
+    private ValueCallback<Uri> openFileCallback;
+    private ValueCallback<Uri[]> openFileCallback2;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_FILE_CHOOSER) {
+            Uri result = data == null || resultCode != Activity.RESULT_OK ? null : data.getData();
+            if (openFileCallback != null) {
+                openFileCallback.onReceiveValue(result);
+                openFileCallback = null;
+            }
+            if (openFileCallback2 != null) {
+                openFileCallback2.onReceiveValue(new Uri[] { result });
+                openFileCallback2 = null;
+            }
+        }
+    }
+
+    private WebChromeClient webChromeClient = new WebChromeClient() {
+
+        // Android 3.0+
+        public void openFileChooser(ValueCallback uploadMessage, String acceptType) {
+            openFileChooser(uploadMessage);
+        }
+
+        // Android 4.1+
+        protected void openFileChooser(ValueCallback<Uri> uploadMessage, String acceptType, String capture) {
+            openFileChooser(uploadMessage);
+        }
+
+        protected void openFileChooser(ValueCallback<Uri> uploadMessage) {
+            MainFragment.this.openFileCallback = uploadMessage;
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.file_browser)), REQUEST_FILE_CHOOSER);
+        }
+
+        // Android 5.0+
+        public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
+            if (openFileCallback2 != null) {
+                openFileCallback2.onReceiveValue(null);
+                openFileCallback2 = null;
+            }
+
+            openFileCallback2 = filePathCallback;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Intent intent = fileChooserParams.createIntent();
+                try {
+                    startActivityForResult(intent, REQUEST_FILE_CHOOSER);
+                } catch (ActivityNotFoundException e) {
+                    openFileCallback2 = null;
+                    return false;
+                }
+            }
+            return true;
         }
 
     };

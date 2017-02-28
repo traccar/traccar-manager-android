@@ -4,4 +4,5 @@
     <string name="label_info">This screen will be shown only once. After you click the button, server address will be saved in preferences. To change it, clear app data from application manager.</string>
     <string name="button_start">Start</string>
     <string name="error_connection">Server connection failed</string>
+    <string name="file_browser">File Browser</string>
 </resources>
