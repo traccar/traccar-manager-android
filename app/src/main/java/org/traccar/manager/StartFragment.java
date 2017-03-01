@@ -87,10 +87,12 @@ public class StartFragment extends Fragment implements View.OnClickListener {
 
             @Override
             protected void onPostExecute(Boolean result) {
-                if (result) {
-                    onSuccess();
-                } else {
-                    onError();
+                if (getActivity() != null) {
+                    if (result) {
+                        onSuccess();
+                    } else {
+                        onError();
+                    }
                 }
             }
 
