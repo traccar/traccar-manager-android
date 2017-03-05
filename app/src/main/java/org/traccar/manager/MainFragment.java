@@ -143,7 +143,7 @@ public class MainFragment extends WebViewFragment {
                 openFileCallback = null;
             }
             if (openFileCallback2 != null) {
-                openFileCallback2.onReceiveValue(new Uri[] { result });
+                openFileCallback2.onReceiveValue(result != null ? new Uri[] { result } : new Uri[0]);
                 openFileCallback2 = null;
             }
         }
