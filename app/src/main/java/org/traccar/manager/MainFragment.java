@@ -65,6 +65,7 @@ public class MainFragment extends WebViewFragment {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
 
         String url = PreferenceManager.getDefaultSharedPreferences(
                 getActivity()).getString(MainActivity.PREFERENCE_URL, null);
