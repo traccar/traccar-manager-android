@@ -1,6 +1,6 @@
 # [Traccar Manager for Android](https://www.traccar.org/manager)
 
-[![](https://play.google.com/intl/en_us/badges/images/badge_new.png)](https://play.google.com/store/apps/details?id=org.traccar.manager)
+[![Get it on Google Play](http://www.tananaev.com/badges/google-play.svg)](https://play.google.com/store/apps/details?id=org.traccar.manager)
 
 ## Overview
 
