@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "org.traccar.manager"
         minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 12
-        versionName "2.2"
+        targetSdkVersion 26
+        versionCode 13
+        versionName "3.0"
     }
 
     buildTypes {
