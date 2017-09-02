@@ -1,10 +1,8 @@
 .gradle
 .idea/
-traccar-manager-android.iml
 local.properties
-app/app.iml
+*.iml
 build/
-app/build/
 app/src/main/assets
 .DS_Store
-
+google-services.json
