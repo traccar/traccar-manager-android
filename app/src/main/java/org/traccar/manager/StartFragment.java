@@ -103,7 +103,7 @@ public class StartFragment extends Fragment implements View.OnClickListener {
         PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .edit().putString(MainActivity.PREFERENCE_URL, serverField.getText().toString()).apply();
         getActivity().getFragmentManager()
-                .beginTransaction().replace(android.R.id.content, new MainFragment()).commit();
+                .beginTransaction().replace(android.R.id.content, new MainFragment()).commitAllowingStateLoss();
     }
 
     private void onError() {
