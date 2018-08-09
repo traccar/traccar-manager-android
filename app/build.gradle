@@ -1,18 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
+    buildToolsVersion '28.0.2'
 
     defaultConfig {
-        applicationId "org.traccar.manager"
+        applicationId 'org.traccar.manager'
         minSdkVersion 19
-        targetSdkVersion 27
-        versionCode 15
-        versionName "2.5"
+        targetSdkVersion 28
+        versionCode 16
+        versionName '2.6'
     }
 
-    flavorDimensions "default"
+    flavorDimensions 'default'
     productFlavors {
         regular
         google
@@ -20,14 +20,12 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:design:27.1.0'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.6.1'
-    googleCompile 'com.google.firebase:firebase-core:11.8.0'
-    googleCompile 'com.crashlytics.sdk.android:crashlytics:2.9.1'
+    compile 'com.android.support:design:28.0.0-rc01'
+    googleCompile 'com.google.firebase:firebase-core:16.0.1'
+    googleCompile 'com.crashlytics.sdk.android:crashlytics:2.9.4'
 }
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Google")) {
+if (getGradle().getStartParameter().getTaskRequests().toString().contains('Google')) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'io.fabric'
 
