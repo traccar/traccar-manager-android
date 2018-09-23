@@ -21,8 +21,9 @@ android {
 
 dependencies {
     implementation 'com.android.support:design:28.0.0-rc02'
-    googleImplementation 'com.google.firebase:firebase-core:16.0.1'
-    googleImplementation 'com.crashlytics.sdk.android:crashlytics:2.9.4'
+    googleImplementation 'com.google.firebase:firebase-core:16.0.3'
+    googleImplementation 'com.google.firebase:firebase-messaging:17.3.2'
+    googleImplementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
 }
 
 if (getGradle().getStartParameter().getTaskRequests().toString().contains('Google')) {

@@ -17,14 +17,20 @@ package org.traccar.manager;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -42,15 +48,36 @@ import java.util.Map;
 
 public class MainFragment extends WebViewFragment {
 
+    public final static String EVENT_LOGIN = "eventLogin";
+    public final static String EVENT_TOKEN = "eventToken";
+    public final static String KEY_TOKEN = "keyToken";
+
     private final static int REQUEST_FILE_CHOOSER = 1;
 
     private AssetManager assetManager;
+    private LocalBroadcastManager broadcastManager;
+
+    public class AppInterface {
+
+        @JavascriptInterface
+        public void postMessage(String message) {
+            if (message.contains("login")) {
+                broadcastManager.sendBroadcast(new Intent(EVENT_LOGIN));
+            }
+        }
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        assetManager = getActivity().getAssets();
+        broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        assetManager = getActivity().getAssets();
 
         if ((getActivity().getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -60,6 +87,7 @@ public class MainFragment extends WebViewFragment {
 
         getWebView().setWebViewClient(webViewClient);
         getWebView().setWebChromeClient(webChromeClient);
+        getWebView().addJavascriptInterface(new AppInterface(), "appInterface");
 
         WebSettings webSettings = getWebView().getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -71,6 +99,28 @@ public class MainFragment extends WebViewFragment {
                 getActivity()).getString(MainActivity.PREFERENCE_URL, null);
 
         getWebView().loadUrl(url);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String token = intent.getStringExtra(KEY_TOKEN);
+            String code = "updateNotificationToken && updateNotificationToken('" + token + "')";
+            getWebView().evaluateJavascript(code, null);
+        }
+    };
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        IntentFilter intentFilter = new IntentFilter(EVENT_TOKEN);
+        broadcastManager.registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        broadcastManager.unregisterReceiver(broadcastReceiver);
     }
 
     public String getMimeType(String url) {

@@ -1,0 +1,3 @@
+<resources>
+    <string name="notification_channel_id">default</string>
+</resources>
