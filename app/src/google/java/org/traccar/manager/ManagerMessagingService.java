@@ -32,7 +32,7 @@ public class ManagerMessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notification_channel_id))
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_notify)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(remoteMessage.getNotification().getBody())
                 .setAutoCancel(true)
