@@ -15,6 +15,7 @@
  */
 package org.traccar.manager;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -54,6 +55,7 @@ public class StartFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onClick(View view) {
         startButton.setEnabled(false);

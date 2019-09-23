@@ -6,7 +6,8 @@
 
     <application
         android:name=".GoogleMainApplication"
-        tools:replace="android:name">
+        tools:replace="android:name"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
