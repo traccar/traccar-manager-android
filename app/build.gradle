@@ -13,7 +13,9 @@ android {
 
     flavorDimensions 'default'
     productFlavors {
-        regular
+        regular {
+            isDefault.set(true)
+        }
         google
     }
 }
