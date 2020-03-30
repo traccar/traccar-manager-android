@@ -69,6 +69,16 @@ public class StartFragment extends Fragment implements View.OnClickListener {
                     Uri uri = Uri.parse(urls[0]).buildUpon().appendEncodedPath("api/server").build();
                     URL url = new URL(uri.toString());
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    int responseCode = urlConnection.getResponseCode();
+                    switch(responseCode) {
+                    case HttpURLConnection.HTTP_MOVED_TEMP:
+                    case HttpURLConnection.HTTP_MOVED_PERM:
+                        String location = urlConnection.getHeaderField("Location");
+                        if(location != null) {
+                            url = new URL(location);
+                            urlConnection = (HttpURLConnection) url.openConnection();
+                        }
+                    }
                     BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 
                     String line;
