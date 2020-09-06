@@ -34,7 +34,7 @@ if (getGradle().getStartParameter().getTaskRequests().toString().contains('Googl
     apply plugin: 'com.google.firebase.crashlytics'
 
     task copyJson(type: Copy) {
-        from '../../traccar-shared/google-services'
+        from '../../environment/google-services'
         into '.'
         include 'traccar-manager-android.json'
         rename('traccar-manager-android.json', 'google-services.json')
