@@ -7,8 +7,13 @@ android {
         applicationId 'org.traccar.manager'
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 21
-        versionName '2.10'
+        versionCode 22
+        versionName '2.11'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     flavorDimensions 'default'
@@ -21,12 +26,12 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
-    googleImplementation 'com.google.firebase:firebase-core:17.4.3'
-    googleImplementation 'com.google.firebase:firebase-analytics:17.4.3'
-    googleImplementation 'com.google.firebase:firebase-messaging:20.2.0'
-    googleImplementation 'com.google.firebase:firebase-crashlytics:17.0.1'
+    googleImplementation 'com.google.firebase:firebase-core:17.5.0'
+    googleImplementation 'com.google.firebase:firebase-analytics:17.5.0'
+    googleImplementation 'com.google.firebase:firebase-messaging:20.2.4'
+    googleImplementation 'com.google.firebase:firebase-crashlytics:17.2.1'
 }
 
 if (getGradle().getStartParameter().getTaskRequests().toString().contains('Google')) {
