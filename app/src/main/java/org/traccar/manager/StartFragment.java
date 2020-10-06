@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ public class StartFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = StartFragment.class.getSimpleName();
 
+    private static int MAX_REDIRECTS = 5;
+
     private EditText serverField;
     private Button startButton;
 
@@ -67,8 +69,24 @@ public class StartFragment extends Fragment implements View.OnClickListener {
                 try {
 
                     Uri uri = Uri.parse(urls[0]).buildUpon().appendEncodedPath("api/server").build();
-                    URL url = new URL(uri.toString());
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    String url = uri.toString();
+                    HttpURLConnection urlConnection = null;
+
+                    for (int i = 0; i < MAX_REDIRECTS; i++) {
+                        URL resourceUrl = new URL(url);
+                        urlConnection = (HttpURLConnection) resourceUrl.openConnection();
+                        urlConnection.setInstanceFollowRedirects(false);
+
+                        switch (urlConnection.getResponseCode()) {
+                            case HttpURLConnection.HTTP_MOVED_PERM:
+                            case HttpURLConnection.HTTP_MOVED_TEMP:
+                                url = urlConnection.getHeaderField("Location");
+                                continue;
+                        }
+
+                        break;
+                    }
+
                     BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 
                     String line;
