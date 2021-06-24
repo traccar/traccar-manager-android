@@ -15,6 +15,7 @@
  */
 package org.traccar.manager;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -23,11 +24,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -35,7 +38,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewFragment;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MainFragment extends WebViewFragment {
@@ -44,6 +51,7 @@ public class MainFragment extends WebViewFragment {
     public final static String EVENT_TOKEN = "eventToken";
     public final static String KEY_TOKEN = "keyToken";
 
+    private static final int REQUEST_PERMISSIONS_LOCATION = 1;
     private final static int REQUEST_FILE_CHOOSER = 1;
 
     private LocalBroadcastManager broadcastManager;
@@ -129,7 +137,48 @@ public class MainFragment extends WebViewFragment {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSIONS_LOCATION) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (geolocationCallback != null) {
+                geolocationCallback.invoke(geolocationRequestOrigin, granted, false);
+                geolocationRequestOrigin = null;
+                geolocationCallback = null;
+            }
+        }
+    }
+
+    private String geolocationRequestOrigin;
+    private GeolocationPermissions.Callback geolocationCallback;
+
     private final WebChromeClient webChromeClient = new WebChromeClient() {
+
+        @Override
+        public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+            geolocationRequestOrigin = null;
+            geolocationCallback = null;
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.permission_location_rationale)
+                            .setNeutralButton(android.R.string.ok, (dialog, which) -> {
+                                geolocationRequestOrigin = origin;
+                                geolocationCallback = callback;
+                                ActivityCompat.requestPermissions(
+                                        getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_PERMISSIONS_LOCATION);
+                            })
+                            .show();
+                } else {
+                    geolocationRequestOrigin = origin;
+                    geolocationCallback = callback;
+                    ActivityCompat.requestPermissions(
+                            getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_PERMISSIONS_LOCATION);
+                }
+            } else {
+                callback.invoke(origin, true, false);
+            }
+        }
 
         // Android 4.1+
         protected void openFileChooser(ValueCallback<Uri> uploadMessage, String acceptType, String capture) {
