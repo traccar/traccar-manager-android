@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar.manager;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -64,14 +65,13 @@ public class MainFragment extends WebViewFragment {
         broadcastManager = LocalBroadcastManager.getInstance(getActivity());
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         if ((getActivity().getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                WebView.setWebContentsDebuggingEnabled(true);
-            }
+            WebView.setWebContentsDebuggingEnabled(true);
         }
 
         getWebView().setWebChromeClient(webChromeClient);
@@ -89,7 +89,7 @@ public class MainFragment extends WebViewFragment {
         getWebView().loadUrl(url);
     }
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String token = intent.getStringExtra(KEY_TOKEN);
@@ -129,12 +129,7 @@ public class MainFragment extends WebViewFragment {
         }
     }
 
-    private WebChromeClient webChromeClient = new WebChromeClient() {
-
-        // Android 3.0+
-        public void openFileChooser(ValueCallback uploadMessage, String acceptType) {
-            openFileChooser(uploadMessage);
-        }
+    private final WebChromeClient webChromeClient = new WebChromeClient() {
 
         // Android 4.1+
         protected void openFileChooser(ValueCallback<Uri> uploadMessage, String acceptType, String capture) {

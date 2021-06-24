@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class StartFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = StartFragment.class.getSimpleName();
 
-    private static int MAX_REDIRECTS = 5;
+    private static final int MAX_REDIRECTS = 5;
 
     private EditText serverField;
     private Button startButton;
