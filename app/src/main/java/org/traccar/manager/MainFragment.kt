@@ -13,206 +13,194 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.manager;
+@file:Suppress("DEPRECATION")
+package org.traccar.manager
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.view.View;
-import android.webkit.GeolocationPermissions;
-import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewFragment;
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.view.View
+import android.webkit.GeolocationPermissions
+import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewFragment
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+class MainFragment : WebViewFragment() {
 
-public class MainFragment extends WebViewFragment {
+    private lateinit var broadcastManager: LocalBroadcastManager
 
-    public final static String EVENT_LOGIN = "eventLogin";
-    public final static String EVENT_TOKEN = "eventToken";
-    public final static String KEY_TOKEN = "keyToken";
-
-    private static final int REQUEST_PERMISSIONS_LOCATION = 1;
-    private final static int REQUEST_FILE_CHOOSER = 1;
-
-    private LocalBroadcastManager broadcastManager;
-
-    public class AppInterface {
-
+    inner class AppInterface {
         @JavascriptInterface
-        public void postMessage(String message) {
+        fun postMessage(message: String) {
             if (message.contains("login")) {
-                broadcastManager.sendBroadcast(new Intent(EVENT_LOGIN));
+                broadcastManager.sendBroadcast(Intent(EVENT_LOGIN))
             }
         }
-
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        broadcastManager = LocalBroadcastManager.getInstance(activity)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        if ((getActivity().getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-            WebView.setWebContentsDebuggingEnabled(true);
+        if ((activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            WebView.setWebContentsDebuggingEnabled(true)
         }
-
-        getWebView().setWebChromeClient(webChromeClient);
-        getWebView().addJavascriptInterface(new AppInterface(), "appInterface");
-
-        WebSettings webSettings = getWebView().getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setDatabaseEnabled(true);
-        webSettings.setMediaPlaybackRequiresUserGesture(false);
-
-        String url = PreferenceManager.getDefaultSharedPreferences(
-                getActivity()).getString(MainActivity.PREFERENCE_URL, null);
-
-        getWebView().loadUrl(url);
+        webView.webChromeClient = webChromeClient
+        webView.addJavascriptInterface(AppInterface(), "appInterface")
+        val webSettings = webView.settings
+        webSettings.javaScriptEnabled = true
+        webSettings.domStorageEnabled = true
+        webSettings.databaseEnabled = true
+        webSettings.mediaPlaybackRequiresUserGesture = false
+        val url = PreferenceManager.getDefaultSharedPreferences(activity)
+            .getString(MainActivity.PREFERENCE_URL, null)
+        url?.let { webView.loadUrl(it) }
     }
 
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String token = intent.getStringExtra(KEY_TOKEN);
-            String code = "updateNotificationToken && updateNotificationToken('" + token + "')";
-            getWebView().evaluateJavascript(code, null);
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val token = intent.getStringExtra(KEY_TOKEN)
+            val code = "updateNotificationToken && updateNotificationToken('$token')"
+            webView.evaluateJavascript(code, null)
         }
-    };
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        IntentFilter intentFilter = new IntentFilter(EVENT_TOKEN);
-        broadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        broadcastManager.unregisterReceiver(broadcastReceiver);
+    override fun onStart() {
+        super.onStart()
+        val intentFilter = IntentFilter(EVENT_TOKEN)
+        broadcastManager.registerReceiver(broadcastReceiver, intentFilter)
     }
 
-    private ValueCallback<Uri> openFileCallback;
-    private ValueCallback<Uri[]> openFileCallback2;
+    override fun onStop() {
+        super.onStop()
+        broadcastManager.unregisterReceiver(broadcastReceiver)
+    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    private var openFileCallback: ValueCallback<Uri?>? = null
+    private var openFileCallback2: ValueCallback<Array<Uri>>? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode == REQUEST_FILE_CHOOSER) {
-            Uri result = data == null || resultCode != Activity.RESULT_OK ? null : data.getData();
+            val result = if (resultCode != Activity.RESULT_OK) null else data.data
             if (openFileCallback != null) {
-                openFileCallback.onReceiveValue(result);
-                openFileCallback = null;
+                openFileCallback?.onReceiveValue(result)
+                openFileCallback = null
             }
             if (openFileCallback2 != null) {
-                openFileCallback2.onReceiveValue(result != null ? new Uri[] { result } : new Uri[0]);
-                openFileCallback2 = null;
+                openFileCallback2?.onReceiveValue(if (result != null) arrayOf(result) else arrayOf())
+                openFileCallback2 = null
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == REQUEST_PERMISSIONS_LOCATION) {
-            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
             if (geolocationCallback != null) {
-                geolocationCallback.invoke(geolocationRequestOrigin, granted, false);
-                geolocationRequestOrigin = null;
-                geolocationCallback = null;
+                geolocationCallback?.invoke(geolocationRequestOrigin, granted, false)
+                geolocationRequestOrigin = null
+                geolocationCallback = null
             }
         }
     }
 
-    private String geolocationRequestOrigin;
-    private GeolocationPermissions.Callback geolocationCallback;
+    private var geolocationRequestOrigin: String? = null
+    private var geolocationCallback: GeolocationPermissions.Callback? = null
 
-    private final WebChromeClient webChromeClient = new WebChromeClient() {
+    private val webChromeClient: WebChromeClient = object : WebChromeClient() {
 
-        @Override
-        public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-            geolocationRequestOrigin = null;
-            geolocationCallback = null;
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    new AlertDialog.Builder(getActivity())
-                            .setMessage(R.string.permission_location_rationale)
-                            .setNeutralButton(android.R.string.ok, (dialog, which) -> {
-                                geolocationRequestOrigin = origin;
-                                geolocationCallback = callback;
-                                ActivityCompat.requestPermissions(
-                                        getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_PERMISSIONS_LOCATION);
-                            })
-                            .show();
+        override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
+            geolocationRequestOrigin = null
+            geolocationCallback = null
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    AlertDialog.Builder(activity)
+                        .setMessage(R.string.permission_location_rationale)
+                        .setNeutralButton(android.R.string.ok) { dialog: DialogInterface?, which: Int ->
+                            geolocationRequestOrigin = origin
+                            geolocationCallback = callback
+                            ActivityCompat.requestPermissions(
+                                activity,
+                                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                REQUEST_PERMISSIONS_LOCATION
+                            )
+                        }
+                        .show()
                 } else {
-                    geolocationRequestOrigin = origin;
-                    geolocationCallback = callback;
+                    geolocationRequestOrigin = origin
+                    geolocationCallback = callback
                     ActivityCompat.requestPermissions(
-                            getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_PERMISSIONS_LOCATION);
+                        activity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        REQUEST_PERMISSIONS_LOCATION
+                    )
                 }
             } else {
-                callback.invoke(origin, true, false);
+                callback.invoke(origin, true, false)
             }
         }
 
         // Android 4.1+
-        protected void openFileChooser(ValueCallback<Uri> uploadMessage, String acceptType, String capture) {
-            openFileChooser(uploadMessage);
-        }
-
-        protected void openFileChooser(ValueCallback<Uri> uploadMessage) {
-            MainFragment.this.openFileCallback = uploadMessage;
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.file_browser)), REQUEST_FILE_CHOOSER);
+        fun openFileChooser(uploadMessage: ValueCallback<Uri?>?, acceptType: String?, capture: String?) {
+            openFileCallback = uploadMessage
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "*/*"
+            startActivityForResult(
+                Intent.createChooser(intent, getString(R.string.file_browser)),
+                REQUEST_FILE_CHOOSER
+            )
         }
 
         // Android 5.0+
-        public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
-            if (openFileCallback2 != null) {
-                openFileCallback2.onReceiveValue(null);
-                openFileCallback2 = null;
-            }
-
-            openFileCallback2 = filePathCallback;
+        override fun onShowFileChooser(
+            mWebView: WebView,
+            filePathCallback: ValueCallback<Array<Uri>>,
+            fileChooserParams: FileChooserParams
+        ): Boolean {
+            openFileCallback2?.onReceiveValue(null)
+            openFileCallback2 = filePathCallback
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Intent intent = fileChooserParams.createIntent();
+                val intent = fileChooserParams.createIntent()
                 try {
-                    startActivityForResult(intent, REQUEST_FILE_CHOOSER);
-                } catch (ActivityNotFoundException e) {
-                    openFileCallback2 = null;
-                    return false;
+                    startActivityForResult(intent, REQUEST_FILE_CHOOSER)
+                } catch (e: ActivityNotFoundException) {
+                    openFileCallback2 = null
+                    return false
                 }
             }
-            return true;
+            return true
         }
+    }
 
-    };
-
+    companion object {
+        const val EVENT_LOGIN = "eventLogin"
+        const val EVENT_TOKEN = "eventToken"
+        const val KEY_TOKEN = "keyToken"
+        private const val REQUEST_PERMISSIONS_LOCATION = 1
+        private const val REQUEST_FILE_CHOOSER = 1
+    }
 }
