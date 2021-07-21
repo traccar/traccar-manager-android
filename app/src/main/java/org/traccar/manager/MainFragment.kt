@@ -102,9 +102,9 @@ class MainFragment : WebViewFragment() {
     private var openFileCallback: ValueCallback<Uri?>? = null
     private var openFileCallback2: ValueCallback<Array<Uri>>? = null
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_FILE_CHOOSER) {
-            val result = if (resultCode != Activity.RESULT_OK) null else data.data
+            val result = if (resultCode != Activity.RESULT_OK) null else data?.data
             if (openFileCallback != null) {
                 openFileCallback?.onReceiveValue(result)
                 openFileCallback = null

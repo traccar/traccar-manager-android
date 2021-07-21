@@ -49,7 +49,7 @@ class GoogleMainApplication : Application() {
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             FirebaseMessaging.getInstance().token.addOnCompleteListener {
-                if (it.isComplete) {
+                if (it.isSuccessful) {
                     broadcastToken(it.result)
                 }
             }
