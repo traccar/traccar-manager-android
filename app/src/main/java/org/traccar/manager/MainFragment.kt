@@ -36,6 +36,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.webkit.WebViewFragment
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -68,6 +69,7 @@ class MainFragment : WebViewFragment() {
         if ((activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
+        webView.webViewClient = WebViewClient() // handle redirects in the app
         webView.webChromeClient = webChromeClient
         webView.addJavascriptInterface(AppInterface(), "appInterface")
         val webSettings = webView.settings

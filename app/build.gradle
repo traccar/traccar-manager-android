@@ -8,8 +8,8 @@ android {
         applicationId 'org.traccar.manager'
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 27
-        versionName '2.16'
+        versionCode 28
+        versionName '2.17'
     }
 
     compileOptions {
