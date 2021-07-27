@@ -31,7 +31,6 @@ import android.widget.EditText
 import androidx.preference.PreferenceManager
 import org.json.JSONException
 import org.json.JSONObject
-import org.traccar.manager.StartFragment
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader

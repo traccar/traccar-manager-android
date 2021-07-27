@@ -77,7 +77,13 @@ class MainFragment : WebViewFragment() {
         webSettings.mediaPlaybackRequiresUserGesture = false
         val url = PreferenceManager.getDefaultSharedPreferences(activity)
             .getString(MainActivity.PREFERENCE_URL, null)
-        url?.let { webView.loadUrl(it) }
+        if (url != null) {
+            webView.loadUrl(url)
+        } else {
+            activity.fragmentManager
+                .beginTransaction().replace(android.R.id.content, StartFragment())
+                .commitAllowingStateLoss()
+        }
     }
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
