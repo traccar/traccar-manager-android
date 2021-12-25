@@ -51,8 +51,13 @@ class MainFragment : WebViewFragment() {
     inner class AppInterface {
         @JavascriptInterface
         fun postMessage(message: String) {
-            if (message.contains("login")) {
+            if (message.startsWith("login")) {
                 broadcastManager.sendBroadcast(Intent(EVENT_LOGIN))
+            } else if (message.startsWith("server")) {
+                val url = message.substring(7)
+                PreferenceManager.getDefaultSharedPreferences(activity)
+                    .edit().putString(MainActivity.PREFERENCE_URL, url).apply()
+                activity.runOnUiThread { webView.loadUrl(url) }
             }
         }
     }
@@ -138,7 +143,7 @@ class MainFragment : WebViewFragment() {
     private var geolocationRequestOrigin: String? = null
     private var geolocationCallback: GeolocationPermissions.Callback? = null
 
-    private val webChromeClient: WebChromeClient = object : WebChromeClient() {
+    private val webChromeClient = object : WebChromeClient() {
 
         override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
             geolocationRequestOrigin = null
