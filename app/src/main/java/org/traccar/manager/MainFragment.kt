@@ -152,7 +152,7 @@ class MainFragment : WebViewFragment() {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     AlertDialog.Builder(activity)
                         .setMessage(R.string.permission_location_rationale)
-                        .setNeutralButton(android.R.string.ok) { dialog: DialogInterface?, which: Int ->
+                        .setNeutralButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
                             geolocationRequestOrigin = origin
                             geolocationCallback = callback
                             ActivityCompat.requestPermissions(
@@ -177,6 +177,7 @@ class MainFragment : WebViewFragment() {
         }
 
         // Android 4.1+
+        @Suppress("UNUSED_PARAMETER")
         fun openFileChooser(uploadMessage: ValueCallback<Uri?>?, acceptType: String?, capture: String?) {
             openFileCallback = uploadMessage
             val intent = Intent(Intent.ACTION_GET_CONTENT)
