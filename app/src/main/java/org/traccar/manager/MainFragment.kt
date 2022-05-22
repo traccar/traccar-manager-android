@@ -38,7 +38,9 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.WebViewFragment
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -90,6 +92,14 @@ class MainFragment : WebViewFragment() {
             activity.fragmentManager
                 .beginTransaction().replace(android.R.id.content, StartFragment())
                 .commitAllowingStateLoss()
+        }
+
+        (activity as AppCompatActivity).onBackPressedDispatcher.addCallback {
+            if (webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                activity.onBackPressed()
+            }
         }
     }
 
