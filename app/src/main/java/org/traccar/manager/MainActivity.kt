@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.manager
 
 import android.os.Build
 import android.os.Bundle
+import android.webkit.WebViewFragment
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
@@ -44,6 +45,16 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         val fragment = fragmentManager.findFragmentById(android.R.id.content)
         fragment?.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onBackPressed() {
+        val fragment = fragmentManager.findFragmentById(android.R.id.content) as? WebViewFragment
+        if (fragment?.webView?.canGoBack() == true) {
+            fragment.webView.goBack();
+        } else {
+            super.onBackPressed()
+        }
     }
 
     companion object {
