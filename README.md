@@ -1,6 +1,11 @@
 # [Traccar Manager for Android](https://www.traccar.org/manager)
 
-[![Get it on Google Play](http://www.tananaev.com/badges/google-play.svg)](https://play.google.com/store/apps/details?id=org.traccar.manager)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="70">](https://play.google.com/store/apps/details?id=org.traccar.manager)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+     alt="Get it on IzzyOnDroid"
+     height="70">](https://apt.izzysoft.de/fdroid/index/apk/org.traccar.manager)
 
 ## Overview
 
