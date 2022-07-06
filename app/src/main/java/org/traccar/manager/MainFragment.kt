@@ -19,25 +19,15 @@ package org.traccar.manager
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ActivityNotFoundException
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.view.View
-import android.webkit.GeolocationPermissions
-import android.webkit.JavascriptInterface
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.webkit.WebViewFragment
+import android.webkit.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -82,6 +72,7 @@ class MainFragment : WebViewFragment() {
         webSettings.domStorageEnabled = true
         webSettings.databaseEnabled = true
         webSettings.mediaPlaybackRequiresUserGesture = false
+        webSettings.setSupportMultipleWindows(true)
         val url = PreferenceManager.getDefaultSharedPreferences(activity)
             .getString(MainActivity.PREFERENCE_URL, null)
         if (url != null) {
@@ -144,6 +135,17 @@ class MainFragment : WebViewFragment() {
     private var geolocationCallback: GeolocationPermissions.Callback? = null
 
     private val webChromeClient = object : WebChromeClient() {
+
+        override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+            val data = view.hitTestResult.extra
+            return if (data != null) {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(data))
+                view.context.startActivity(browserIntent)
+                true
+            } else {
+                false
+            }
+        }
 
         override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
             geolocationRequestOrigin = null
