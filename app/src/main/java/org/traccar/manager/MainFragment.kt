@@ -64,7 +64,7 @@ class MainFragment : WebViewFragment() {
         if ((activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
-        webView.webViewClient = WebViewClient() // handle redirects in the app
+        webView.webViewClient = webViewClient
         webView.webChromeClient = webChromeClient
         webView.addJavascriptInterface(AppInterface(), "appInterface")
         val webSettings = webView.settings
@@ -133,6 +133,16 @@ class MainFragment : WebViewFragment() {
 
     private var geolocationRequestOrigin: String? = null
     private var geolocationCallback: GeolocationPermissions.Callback? = null
+
+    private val webViewClient = object : WebViewClient() {
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                CookieManager.getInstance().flush()
+            }
+        }
+    }
 
     private val webChromeClient = object : WebChromeClient() {
 
