@@ -8,8 +8,8 @@ android {
         applicationId 'org.traccar.manager'
         minSdkVersion 19
         targetSdkVersion 32
-        versionCode 32
-        versionName '3.1'
+        versionCode 33
+        versionName '3.2'
     }
     namespace 'org.traccar.manager'
 
@@ -23,10 +23,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.material:material:1.6.0'
+    implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'androidx.preference:preference-ktx:1.2.0'
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.8.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     googleImplementation platform('com.google.firebase:firebase-bom:29.0.3')
     googleImplementation 'com.google.firebase:firebase-core'
