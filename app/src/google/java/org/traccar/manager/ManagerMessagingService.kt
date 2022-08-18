@@ -34,7 +34,9 @@ class ManagerMessagingService : FirebaseMessagingService() {
         } else {
             PendingIntent.FLAG_ONE_SHOT
         }
-        val pendingIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), flags)
+        val intent = Intent(this, MainActivity::class.java)
+        remoteMessage.data["eventId"]?.let { intent.putExtra("eventId", it) }
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, flags)
         val builder = NotificationCompat.Builder(this, getString(R.string.notification_channel_id))
             .setSmallIcon(R.drawable.ic_stat_notify)
             .setContentTitle(getString(R.string.app_name))
