@@ -47,7 +47,7 @@ class MainFragment : WebViewFragment() {
                 val url = message.substring(7)
                 PreferenceManager.getDefaultSharedPreferences(activity)
                     .edit().putString(MainActivity.PREFERENCE_URL, url).apply()
-                activity.runOnUiThread { webView.loadUrl(url) }
+                activity.runOnUiThread { loadPage() }
             }
         }
     }
@@ -73,10 +73,21 @@ class MainFragment : WebViewFragment() {
         webSettings.databaseEnabled = true
         webSettings.mediaPlaybackRequiresUserGesture = false
         webSettings.setSupportMultipleWindows(true)
+        loadPage()
+    }
+
+    private fun loadPage() {
         val url = PreferenceManager.getDefaultSharedPreferences(activity)
             .getString(MainActivity.PREFERENCE_URL, null)
         if (url != null) {
-            webView.loadUrl(url)
+            val mainActivity = activity as? MainActivity
+            val eventId = mainActivity?.pendingEventId
+            mainActivity?.pendingEventId = null
+            if (eventId != null) {
+                webView.loadUrl("$url?eventId=$eventId")
+            } else {
+                webView.loadUrl(url)
+            }
         } else {
             activity.fragmentManager
                 .beginTransaction().replace(android.R.id.content, StartFragment())
@@ -84,7 +95,7 @@ class MainFragment : WebViewFragment() {
         }
     }
 
-    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val tokenBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val token = intent.getStringExtra(KEY_TOKEN)
             val code = "updateNotificationToken && updateNotificationToken('$token')"
@@ -92,15 +103,22 @@ class MainFragment : WebViewFragment() {
         }
     }
 
+    private val eventIdBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            loadPage()
+        }
+    }
+
     override fun onStart() {
         super.onStart()
-        val intentFilter = IntentFilter(EVENT_TOKEN)
-        broadcastManager.registerReceiver(broadcastReceiver, intentFilter)
+        broadcastManager.registerReceiver(tokenBroadcastReceiver, IntentFilter(EVENT_TOKEN))
+        broadcastManager.registerReceiver(eventIdBroadcastReceiver, IntentFilter(EVENT_EVENT))
     }
 
     override fun onStop() {
         super.onStop()
-        broadcastManager.unregisterReceiver(broadcastReceiver)
+        broadcastManager.unregisterReceiver(tokenBroadcastReceiver)
+        broadcastManager.unregisterReceiver(eventIdBroadcastReceiver)
     }
 
     private var openFileCallback: ValueCallback<Uri?>? = null
@@ -225,6 +243,7 @@ class MainFragment : WebViewFragment() {
     companion object {
         const val EVENT_LOGIN = "eventLogin"
         const val EVENT_TOKEN = "eventToken"
+        const val EVENT_EVENT = "eventEvent"
         const val KEY_TOKEN = "keyToken"
         private const val REQUEST_PERMISSIONS_LOCATION = 1
         private const val REQUEST_FILE_CHOOSER = 1
