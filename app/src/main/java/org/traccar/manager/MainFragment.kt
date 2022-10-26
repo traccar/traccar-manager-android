@@ -42,7 +42,19 @@ class MainFragment : WebViewFragment() {
         @JavascriptInterface
         fun postMessage(message: String) {
             if (message.startsWith("login")) {
+                if (message.length > 6) {
+                    SecurityManager.saveToken(activity, message.substring(6))
+                }
                 broadcastManager.sendBroadcast(Intent(EVENT_LOGIN))
+            } else if (message.startsWith("authentication")) {
+                SecurityManager.readToken(activity) { token ->
+                    if (token != null) {
+                        val code = "handleLoginToken && handleLoginToken('$token')"
+                        webView.evaluateJavascript(code, null)
+                    }
+                }
+            } else if (message.startsWith("logout")) {
+                SecurityManager.deleteToken(activity)
             } else if (message.startsWith("server")) {
                 val url = message.substring(7)
                 PreferenceManager.getDefaultSharedPreferences(activity)

@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId 'org.traccar.manager'
         minSdkVersion 19
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 33
         versionName '3.2'
         multiDexEnabled true
@@ -29,6 +29,7 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     googleImplementation platform('com.google.firebase:firebase-bom:29.0.3')
     googleImplementation 'com.google.firebase:firebase-core'

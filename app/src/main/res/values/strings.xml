@@ -7,4 +7,6 @@
     <string name="file_browser">File Browser</string>
     <string name="notification_channel">Default</string>
     <string name="permission_location_rationale">App requires location permission to show current location on the map</string>
+    <string name="biometric_title">Biometric login</string>
+    <string name="biometric_cancel">Use account password</string>
 </resources>
