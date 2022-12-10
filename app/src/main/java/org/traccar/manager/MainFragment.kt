@@ -123,6 +123,16 @@ class MainFragment : WebViewFragment() {
 
     override fun onStart() {
         super.onStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)) {
+                ActivityCompat.requestPermissions(
+                    activity,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    REQUEST_PERMISSIONS_NOTIFICATION
+                )
+            }
+        }
         broadcastManager.registerReceiver(tokenBroadcastReceiver, IntentFilter(EVENT_TOKEN))
         broadcastManager.registerReceiver(eventIdBroadcastReceiver, IntentFilter(EVENT_EVENT))
     }
@@ -258,6 +268,7 @@ class MainFragment : WebViewFragment() {
         const val EVENT_EVENT = "eventEvent"
         const val KEY_TOKEN = "keyToken"
         private const val REQUEST_PERMISSIONS_LOCATION = 1
+        private const val REQUEST_PERMISSIONS_NOTIFICATION = 2
         private const val REQUEST_FILE_CHOOSER = 1
     }
 }
