@@ -19,12 +19,14 @@ package org.traccar.manager
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.DownloadManager
 import android.content.*
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Message
 import android.view.View
 import android.webkit.*
@@ -78,6 +80,7 @@ class MainFragment : WebViewFragment() {
         }
         webView.webViewClient = webViewClient
         webView.webChromeClient = webChromeClient
+        webView.setDownloadListener(downloadListener)
         webView.addJavascriptInterface(AppInterface(), "appInterface")
         val webSettings = webView.settings
         webSettings.javaScriptEnabled = true
@@ -260,6 +263,20 @@ class MainFragment : WebViewFragment() {
             }
             return true
         }
+    }
+
+    private val downloadListener = DownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
+        val request = DownloadManager.Request(Uri.parse(url))
+        request.setMimeType(mimeType)
+        request.addRequestHeader("cookie", CookieManager.getInstance().getCookie(url))
+        request.allowScanningByMediaScanner()
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        request.setDestinationInExternalPublicDir(
+            Environment.DIRECTORY_DOWNLOADS,
+            URLUtil.guessFileName(url, contentDisposition, mimeType),
+        )
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
     }
 
     companion object {
