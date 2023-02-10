@@ -8,8 +8,8 @@ android {
         applicationId 'org.traccar.manager'
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 35
-        versionName '3.4'
+        versionCode 36
+        versionName '4.0'
         multiDexEnabled true
     }
     namespace 'org.traccar.manager'
