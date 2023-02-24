@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 package org.traccar.manager;
+
+import android.app.DialogFragment;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,22 +27,26 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.traccar.manager.model.Command;
-import org.traccar.manager.model.CommandType;
+
+import androidx.annotation.Nullable;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.traccar.manager.model.Command;
+import org.traccar.manager.model.CommandType;
+import retrofit2.Call;
 import retrofit2.Response;
 
-public class SendCommandFragment extends Fragment {
+public class SendCommandTypesFragment extends DialogFragment {
 
     class CommandTypeDataHolder {
         private String type;
@@ -100,7 +104,7 @@ public class SendCommandFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_send_command, container, false);
+        View view = inflater.inflate(R.layout.fragment_send_command_types, container, false);
 
         commandsSpinner = (Spinner) view.findViewById(R.id.commands);
         frequencyGroup = (LinearLayout) view.findViewById(R.id.frequencyGroup);
@@ -131,10 +135,10 @@ public class SendCommandFragment extends Fragment {
             }
         });
 
-        final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
+        final long deviceId = getArguments().getLong(EXTRA_DEVICE_ID);
         final MainApplication application = (MainApplication) getActivity().getApplication();
         final WebService service = application.getService();
-        service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getContext()) {
+        service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getActivity()) {
             @Override
             public void onSuccess(Response<List<CommandType>> response) {
                 List<CommandTypeDataHolder> commandTypeDataHolders = new ArrayList<>();
@@ -145,6 +149,12 @@ public class SendCommandFragment extends Fragment {
                 }
 
                 commandsSpinner.setAdapter(new CommandTypeAdapter(commandTypeDataHolders));
+            }
+
+            @Override
+            public void onFailure(Call<List<CommandType>> call, Throwable t) {
+                super.onFailure(call, t);
+                System.out.println(t.toString());
             }
         });
 
@@ -160,7 +170,7 @@ public class SendCommandFragment extends Fragment {
                     try {
                         value = Integer.parseInt(frequencyEditText.getText().toString());
                     } catch (NumberFormatException e) {
-                        Toast.makeText(getContext(), R.string.error_invalid_frequency, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.error_invalid_frequency, Toast.LENGTH_LONG).show();
                         return;
                     }
                     int multiplier = getResources().getIntArray(R.array.unit_values)[unitSpinner.getSelectedItemPosition()];
@@ -169,14 +179,18 @@ public class SendCommandFragment extends Fragment {
 
                 final MainApplication application = (MainApplication) getActivity().getApplication();
                 final WebService service = application.getService();
-                service.sendCommand(command).enqueue(new WebServiceCallback<Command>(getContext()) {
+                service.sendCommand(command).enqueue(new WebServiceCallback<Command>(getActivity()) {
                     @Override
                     public void onSuccess(Response<Command> response) {
-                        Toast.makeText(getContext(), R.string.command_sent, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.command_sent, Toast.LENGTH_LONG).show();
+                    }
+                    @Override
+                    public void onFailure(Call<Command> call, Throwable t) {
+                        super.onFailure(call, t);
+                        Toast.makeText(getActivity(), R.string.command_not_sent, Toast.LENGTH_LONG).show();
                     }
                 });
 
-                getActivity().finish();
             }
         });
 
@@ -189,10 +203,10 @@ public class SendCommandFragment extends Fragment {
         Integer resId = i10nMapping.get(key);
         if(resId != null) {
             try {
-                CharSequence nameCharSequence = getContext().getResources().getText(resId);
+                CharSequence nameCharSequence = getActivity().getResources().getText(resId);
                 result = nameCharSequence.toString();
             } catch (Resources.NotFoundException e) {
-                Log.w(SendCommandFragment.class.getSimpleName(), e);
+                Log.w(SendCommandTypesFragment.class.getSimpleName(), e);
             }
         }
 

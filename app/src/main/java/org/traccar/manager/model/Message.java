@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.traccar.manager.model;
-
 public class Message {
 
     private long deviceId;
@@ -36,5 +35,13 @@ public class Message {
     public void setType(String type) {
         this.type = type;
     }
+    private long id;
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

@@ -12,11 +12,15 @@
     <string name="error_invalid_url">Invalid server URL</string>
     <string name="error_invalid_frequency">Frequency must be a valid number</string>
 
+    <string name="click_to_send">Click here to send a command!</string>
+    <string name="describe_types">Send the Command Types (Stop, Resume, etc ) or the Saved Commands, those that are customized.</string>
+    <string name="select_command">Select command type</string>
+    <string name="saved_commands">Saved Commands</string>
+    <string name="protocol_commands">Commands Types</string>
     <string name="devices_title">Devices</string>
     <string name="send_command_title">Send command</string>
     <string name="settings_title">Settings</string>
     <string name="logout_title">Logout</string>
-
     <string name="settings_url">Server</string>
     <string name="settings_email">Email</string>
     <string name="settings_password">Password</string>
@@ -40,6 +44,7 @@
     <string name="command_frequency_unit">Unit</string>
     <string name="command_send">Send</string>
     <string name="command_sent">Command has been sent</string>
+    <string name="command_not_sent">Command NOT sent - ERROR</string>
 
     <string name="command_alarm_arm">Arm</string>
     <string name="command_alarm_disarm">Disarm</string>
@@ -47,4 +52,5 @@
     <string name="command_engine_resume">Engine Resume</string>
     <string name="command_position_periodic">Periodic Reporting</string>
     <string name="command_frequency">Frequency</string>
+
 </resources>

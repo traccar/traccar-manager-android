@@ -17,18 +17,17 @@ package org.traccar.manager;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.multidex.MultiDexApplication;
 import android.widget.Toast;
-
-import org.traccar.manager.model.User;
-
+import androidx.multidex.MultiDexApplication;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.traccar.manager.model.User;
 import okhttp3.JavaNetCookieJar;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -41,9 +40,9 @@ public class MainApplication extends MultiDexApplication {
     public static final String PREFERENCE_URL = "url";
     public static final String PREFERENCE_EMAIL = "email";
     public static final String PREFERENCE_PASSWORD = "password";
-
-    private static final String DEFAULT_SERVER = "http://demo.traccar.org"; // local - http://10.0.2.2:8082
-
+    public static final String PREFERENCE_STORAGE = "APP_PREF";
+    // public static final String DEFAULT_SERVER = "https://demo4.traccar.org"; // local - http://10.0.2.2:8082
+    public static final String DEFAULT_SERVER = "https://gps.investiga.biz";
     public interface GetServiceCallback {
         void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
         boolean onFailure();
@@ -118,7 +117,9 @@ public class MainApplication extends MultiDexApplication {
             @Override
             public void onSuccess(Response<User> response) {
                 MainApplication.this.service = service;
+
                 MainApplication.this.user = response.body();
+
                 for (GetServiceCallback callback : callbacks) {
                     callback.onServiceReady(client, retrofit, service);
                 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.traccar.manager.model;
-
 public class Update {
     public Device[] devices;
     public Position[] positions;

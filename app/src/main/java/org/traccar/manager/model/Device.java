@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.traccar.manager.model;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;

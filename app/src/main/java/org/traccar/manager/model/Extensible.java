@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.traccar.manager.model;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -57,5 +56,16 @@ public abstract class Extensible extends Message {
             attributes.put(entry.getKey(), entry.getValue());
         }
     }
+
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 
 }

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 package org.traccar.manager;
-
+import android.app.Dialog;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +25,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -35,17 +38,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.traccar.manager.model.Device;
-import org.traccar.manager.model.Position;
-import org.traccar.manager.model.Update;
-import org.traccar.manager.model.User;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.traccar.manager.model.Device;
+import org.traccar.manager.model.Position;
+import org.traccar.manager.model.Update;
+import org.traccar.manager.model.User;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -60,9 +62,9 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
     public static final int REQUEST_DEVICE = 1;
     public static final int RESULT_SUCCESS = 1;
-
+    private FragmentTransaction fragmentTransaction;
     private GoogleMap map;
-
+    private long deviceId;
     private Handler handler = new Handler();
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -104,7 +106,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_DEVICE && resultCode == RESULT_SUCCESS) {
-            long deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
+            deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
             Position position = positions.get(deviceId);
             if (position != null) {
                 map.moveCamera(CameraUpdateFactory.newLatLng(
@@ -126,12 +128,59 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
             @Override
             public View getInfoContents(Marker marker) {
-                View view = getLayoutInflater(null).inflate(R.layout.view_info, null);
+                View view = getLayoutInflater().inflate(R.layout.view_info, null);
                 ((TextView) view.findViewById(R.id.title)).setText(marker.getTitle());
                 ((TextView) view.findViewById(R.id.details)).setText(marker.getSnippet());
                 return view;
             }
         });
+
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+
+                    final Dialog dialog = new Dialog(getContext());
+                    dialog.setContentView(R.layout.dialog_select_command);
+                    dialog.setCancelable(true);
+                    TextView tvTitle = dialog.findViewById(R.id.tvTitle);
+                    tvTitle.setText(getString(R.string.select_command));
+                    TextView tvDescribeTypes = dialog.findViewById(R.id.tv_describe_types);
+                    tvDescribeTypes.setText(getString(R.string.describe_types));
+                    Button buttonCommandTypes = dialog.findViewById(R.id.buttonCommandTypes);
+                    Button buttonSaved = dialog.findViewById(R.id.buttonSaved);
+
+                    //CRIANDO EVENTO CLICK PARA O BOTÃO QUE VAI Liberar Motor
+                    buttonCommandTypes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Bundle args = new Bundle();
+                            args.putLong("deviceId", deviceId);
+                            fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+                            SendCommandTypesFragment sendCommandTypesFragment = new SendCommandTypesFragment();
+                            sendCommandTypesFragment.setArguments(args);
+                            sendCommandTypesFragment.show(fragmentTransaction, "sendCommandTypes_tag");
+                            dialog.dismiss();
+                        }
+                    });
+
+                    buttonSaved.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Bundle args = new Bundle();
+                            args.putLong("deviceId", deviceId);
+                            fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+                            SendSavedCommandsFragment sendSavedCommandGPRS = new SendSavedCommandsFragment();
+                            sendSavedCommandGPRS.setArguments(args);
+                            sendSavedCommandGPRS.show(fragmentTransaction, "sendSavedCommand_tag");                            dialog.dismiss();
+                        }
+                    });
+
+                    // now that the dialog is set up, it's time to show it
+                    dialog.show();
+                }
+
+        });
+
 
         createWebSocket();
     }
@@ -166,7 +215,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
             }
         }
         double speed = position.getSpeed() * factor;
-
+        deviceId = position.getDeviceId();
         return new StringBuilder()
                 .append(getString(R.string.position_time)).append(": ")
                 .append(dateFormat.format(position.getFixTime())).append('\n')

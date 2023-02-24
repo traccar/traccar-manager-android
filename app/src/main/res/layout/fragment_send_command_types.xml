@@ -19,11 +19,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="horizontal" >
+                android:orientation="vertical" >
 
                 <TextView
                     android:id="@+id/commandsText"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/command_command"
@@ -32,7 +32,7 @@
 
                 <Spinner
                     android:id="@+id/commands"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
@@ -89,7 +89,7 @@
 
             </LinearLayout>
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_send"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
