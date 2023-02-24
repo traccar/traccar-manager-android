@@ -41,8 +41,8 @@ public class MainApplication extends MultiDexApplication {
     public static final String PREFERENCE_EMAIL = "email";
     public static final String PREFERENCE_PASSWORD = "password";
     public static final String PREFERENCE_STORAGE = "APP_PREF";
-    // public static final String DEFAULT_SERVER = "https://demo4.traccar.org"; // local - http://10.0.2.2:8082
-    public static final String DEFAULT_SERVER = "https://gps.investiga.biz";
+    public static final String DEFAULT_SERVER = "https://demo4.traccar.org"; // local - http://10.0.2.2:8082
+
     public interface GetServiceCallback {
         void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
         boolean onFailure();
