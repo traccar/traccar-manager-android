@@ -17,8 +17,6 @@ package org.traccar.manager;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,22 +26,24 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+
 import org.traccar.manager.model.Command;
 import org.traccar.manager.model.CommandType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import retrofit2.Call;
 import retrofit2.Response;
 
-public class SendCommandFragment extends Fragment {
+public class SendCommandFragment extends DialogFragment {
 
     class CommandTypeDataHolder {
         private String type;
@@ -132,7 +132,7 @@ public class SendCommandFragment extends Fragment {
             }
         });
 
-        final long deviceId = getActivity().getIntent().getExtras().getLong(EXTRA_DEVICE_ID);
+        final long deviceId = getArguments().getLong(EXTRA_DEVICE_ID);
         final MainApplication application = (MainApplication) getActivity().getApplication();
         final WebService service = application.getService();
         service.getCommandTypes(deviceId).enqueue(new WebServiceCallback<List<CommandType>>(getContext()) {
@@ -175,9 +175,14 @@ public class SendCommandFragment extends Fragment {
                     public void onSuccess(Response<Command> response) {
                         Toast.makeText(getContext(), R.string.command_sent, Toast.LENGTH_LONG).show();
                     }
+
+                    @Override
+                    public void onFailure(Call<Command> call, Throwable t) {
+                        super.onFailure(call, t);
+                        Toast.makeText(getActivity(), R.string.command_not_sent, Toast.LENGTH_LONG).show();
+                    }
                 });
 
-                getActivity().finish();
             }
         });
 

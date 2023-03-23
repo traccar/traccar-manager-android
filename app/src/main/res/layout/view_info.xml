@@ -5,11 +5,22 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal">
-
+    <TextView
+        android:id="@+id/click"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:text="@string/action_click_to_send_command" />
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider"
+        />
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:lines="1"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         tools:text="Title" />
 
@@ -17,7 +28,9 @@
         android:id="@+id/details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:maxLines="6"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         tools:text="Speed: 0.0\nCourse: 0" />
+
 
 </LinearLayout>

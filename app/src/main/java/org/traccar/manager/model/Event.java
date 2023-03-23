@@ -17,6 +17,7 @@ package org.traccar.manager.model;
 
 import java.util.Date;
 
+
 public abstract class Event extends Extensible {
 
     // Words separated by dashes (word-second-third)

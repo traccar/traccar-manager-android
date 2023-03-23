@@ -1,9 +1,8 @@
-<android.support.design.widget.TextInputLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="?attr/dialogPreferredPadding">
-
     <EditText
         android:id="@+id/input_url"
         android:layout_width="match_parent"
@@ -11,4 +10,4 @@
         android:hint="@string/settings_url"
         android:inputType="textUri" />
 
-</android.support.design.widget.TextInputLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,46 +1,48 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "org.traccar.manager"
-        minSdkVersion 14
-        targetSdkVersion 24
+        minSdkVersion 19
+        targetSdkVersion 33
         versionCode 9
         versionName "1.7"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
-    }
 
-    dexOptions {
-        incremental true
-        javaMaxHeapSize "4g"
-    }
-
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+
 }
 
 dependencies {
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
-    compile 'com.google.android.gms:play-services:9.6.1'
-    compile 'com.squareup.okhttp3:okhttp-ws:3.4.1'
-    compile "com.squareup.okhttp3:okhttp-urlconnection:3.4.1"
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-jackson:2.1.0'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.squareup.okhttp3:okhttp-ws:3.4.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation "com.squareup.okhttp3:okhttp-urlconnection:3.4.1"
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.1.0'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.2.1'
 }

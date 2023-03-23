@@ -17,9 +17,8 @@ package org.traccar.manager;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.multidex.MultiDexApplication;
 import android.widget.Toast;
-
+import androidx.multidex.MultiDexApplication;
 import org.traccar.manager.model.User;
 
 import java.net.CookieManager;

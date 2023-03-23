@@ -4,7 +4,6 @@
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight">
-
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
