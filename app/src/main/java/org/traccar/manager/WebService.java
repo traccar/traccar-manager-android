@@ -39,7 +39,7 @@ public interface WebService {
     @GET("/api/devices")
     Call<List<Device>> getDevices();
 
-    @GET("api/commands/types")
+    @GET("/api/commands/types")
     Call<List<CommandType>> getCommandTypes(@Query("deviceId") long deviceId);
 
     @POST("/api/commands/send")
