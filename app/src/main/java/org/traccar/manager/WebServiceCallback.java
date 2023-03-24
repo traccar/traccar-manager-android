@@ -17,7 +17,6 @@ package org.traccar.manager;
 
 import android.content.Context;
 import android.widget.Toast;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

@@ -26,6 +26,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.fragment.app.FragmentTransaction;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,12 +62,12 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
     public static final int REQUEST_DEVICE = 1;
     public static final int RESULT_SUCCESS = 1;
-
+    private FragmentTransaction fragmentTransaction;
     private GoogleMap map;
 
     private Handler handler = new Handler();
     private ObjectMapper objectMapper = new ObjectMapper();
-
+    private long deviceId;
     private Map<Long, Device> devices = new HashMap<>();
     private Map<Long, Position> positions = new HashMap<>();
     private Map<Long, Marker> markers = new HashMap<>();
@@ -104,7 +106,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_DEVICE && resultCode == RESULT_SUCCESS) {
-            long deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
+            deviceId = data.getLongExtra(DevicesFragment.EXTRA_DEVICE_ID, 0);
             Position position = positions.get(deviceId);
             if (position != null) {
                 map.moveCamera(CameraUpdateFactory.newLatLng(
@@ -126,13 +128,25 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
 
             @Override
             public View getInfoContents(Marker marker) {
-                View view = getLayoutInflater(null).inflate(R.layout.view_info, null);
+                View view = getLayoutInflater().inflate(R.layout.view_info, null);
                 ((TextView) view.findViewById(R.id.title)).setText(marker.getTitle());
                 ((TextView) view.findViewById(R.id.details)).setText(marker.getSnippet());
                 return view;
             }
         });
 
+
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                        Bundle args = new Bundle();
+                        args.putLong("deviceId", deviceId);
+                        fragmentTransaction =getFragmentManager().beginTransaction();
+                        SendCommandFragment sendCommandFragment = new SendCommandFragment();
+                        sendCommandFragment.setArguments(args);
+                        sendCommandFragment.show(fragmentTransaction, "sendCommand_tag");
+            }
+        });
         createWebSocket();
     }
 
@@ -188,7 +202,7 @@ public class MainFragment extends SupportMapFragment implements OnMapReadyCallba
         Update update = objectMapper.readValue(message, Update.class);
         if (update != null && update.positions != null) {
             for (Position position : update.positions) {
-                long deviceId = position.getDeviceId();
+                deviceId = position.getDeviceId();
                 if (devices.containsKey(deviceId)) {
                     LatLng location = new LatLng(position.getLatitude(), position.getLongitude());
                     Marker marker = markers.get(deviceId);
