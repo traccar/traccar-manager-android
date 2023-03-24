@@ -16,6 +16,7 @@
 package org.traccar.manager;
 
 public class ServiceException extends Exception {
+
     public ServiceException(String message) {
         super(message);
     }

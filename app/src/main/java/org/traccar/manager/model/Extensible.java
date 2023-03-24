@@ -16,7 +16,6 @@
 package org.traccar.manager.model;
 
 import java.util.LinkedHashMap;
-
 import java.util.Map;
 
 public abstract class Extensible extends Message {
