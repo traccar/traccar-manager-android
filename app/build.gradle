@@ -1,35 +1,50 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+}
 
 android {
-    compileSdkVersion 33
-
+    compileSdk 34
     defaultConfig {
         applicationId 'org.traccar.manager'
         minSdkVersion 19
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 36
         versionName '4.0'
         multiDexEnabled true
     }
     namespace 'org.traccar.manager'
 
-    flavorDimensions 'default'
+    buildFeatures {
+        flavorDimensions = ['default']
+    }
     productFlavors {
         regular {
             isDefault = true
+            ext.enableCrashlytics = false
         }
         google
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 
 dependencies {
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     googleImplementation platform('com.google.firebase:firebase-bom:29.0.3')
@@ -38,19 +53,18 @@ dependencies {
     googleImplementation 'com.google.firebase:firebase-crashlytics'
     googleImplementation 'com.google.firebase:firebase-messaging'
 }
-
-if (getGradle().getStartParameter().getTaskRequests().toString().contains('Google')) {
-    apply plugin: 'com.google.gms.google-services'
-    apply plugin: 'com.google.firebase.crashlytics'
-
-    task copyJson(type: Copy) {
-        from '../../environment/google-services'
-        into '.'
-        include 'traccar-manager-android.json'
-        rename('traccar-manager-android.json', 'google-services.json')
-    }
-
-    afterEvaluate {
-        preBuild.dependsOn copyJson
+tasks.register('copyFirebaseConfig', Copy) {
+    from '../../environment/google-services'
+    into '.'
+    include 'traccar-manager-android.json'
+    rename('traccar-manager-android.json', 'google-services.json')
+}
+afterEvaluate {
+    tasks.matching { it.name.contains('Google') }.configureEach { task ->
+        if (task.name.contains('Regular')) {
+            task.enabled false
+        } else {
+            task.dependsOn copyFirebaseConfig
+        }
     }
 }
