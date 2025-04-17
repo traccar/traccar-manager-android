@@ -11,8 +11,8 @@ android {
         applicationId 'org.traccar.manager'
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 40
-        versionName '4.4'
+        versionCode 41
+        versionName '4.5'
         multiDexEnabled true
     }
     namespace 'org.traccar.manager'
